@@ -43,7 +43,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Inventory Dashboard</h2>
+        <h2 className="text-2xl font-bold">Inventory Bla bla something</h2>
         <p className="text-slate-500">Overview of stock, sales, purchases and alerts</p>
       </div>
 
