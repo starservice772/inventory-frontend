@@ -18,7 +18,7 @@ export default function SalesPage() {
       </div>
 
       <button className="bg-green-600 text-white px-4 py-3 rounded-xl">
-        Save Sales Entry
+        Save Sales
       </button>
     </div>
   );
