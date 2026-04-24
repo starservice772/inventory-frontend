@@ -55,7 +55,7 @@ export default function PurchasesPage() {
 
       <div className="flex gap-3">
         <button onClick={addRow} className="bg-slate-800 text-white px-4 py-3 rounded-xl">
-          Add New Row
+          Add Row
         </button>
         <button className="bg-blue-600 text-white px-4 py-3 rounded-xl">
           Save Purchase
