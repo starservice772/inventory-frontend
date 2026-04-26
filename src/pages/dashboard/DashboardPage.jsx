@@ -43,7 +43,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Inventory Fuck you...</h2>
+        <h2 className="text-2xl font-bold">New Inventory WTF</h2>
         <p className="text-slate-500">Overview of stock, sales, purchases and alerts</p>
       </div>
 
@@ -56,7 +56,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 bg-white border rounded-2xl p-5">
-          <h3 className="font-semibold mb-4">Monthly Purchase vs Sales vs Something</h3>
+          <h3 className="font-semibold mb-4">Monthly Purchase vs Sales</h3>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyData}>
@@ -71,7 +71,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="bg-white border rounded-2xl p-5">
-          <h3 className="font-semibold mb-4">Stock Distribution 1 2 3</h3>
+          <h3 className="font-semibold mb-4">Stock Distribution</h3>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
