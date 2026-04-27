@@ -167,7 +167,7 @@ export default function PurchasesPage() {
 
         {/* GST % */}
         <div>
-          <label className="text-sm font-medium">GST %</label>
+          <label className="text-sm font-medium">GST (in %)</label>
           <input
             className="border border-gray-300 p-2 w-full"
             value={form.gstPercentage}
