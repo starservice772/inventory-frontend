@@ -314,16 +314,21 @@ export default function PurchasesPage() {
       <div className="flex gap-3">
         <button
           onClick={addRow}
-          className="bg-slate-800 text-white px-4 py-3 rounded-xl"
+          className="bg-slate-800 text-white px-4 py-3 
+             transition duration-300 ease-in-out 
+             hover:bg-slate-700 hover:scale-105 active:scale-95"
         >
-          Add Row
+          Add
         </button>
 
         <button
           onClick={handleSave}
-          className="bg-blue-600 text-white px-4 py-3 rounded-xl"
+          className="bg-green-600 text-white px-4 py-3 
+           transition-all duration-300 
+           hover:bg-green-700 hover:shadow-lg hover:-translate-y-1 
+           active:scale-95"
         >
-          Save Purchase
+          Save
         </button>
       </div>
     </div>
