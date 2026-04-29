@@ -5,11 +5,11 @@ import toast from "react-hot-toast";
 export default function PurchasesPage() {
   // ✅ Separate form state (header)
   const [form, setForm] = useState({
-    company: "",
+    companyName: "",
     gstNo: "",
     invoiceNo: "",
     invoiceDate: "",
-    invoiceType: "I", //default
+    invoiceType: "Select Type", //default
     gstPercentage: "",
   });
 
@@ -89,7 +89,7 @@ export default function PurchasesPage() {
 
       // reset
       setForm({
-        company: "", gstNo: "",
+        companyName: "", gstNo: "",
         invoiceNo: "",
         invoiceDate: "",
         invoiceType: "",
@@ -121,9 +121,9 @@ export default function PurchasesPage() {
           <label className="text-sm font-medium">Company</label>
           <input
             className="border border-gray-300 p-2 w-full"
-            value={form.company}
+            value={form.companyName}
             onChange={(e) =>
-              setForm({ ...form, company: e.target.value })
+              setForm({ ...form, companyName: e.target.value })
             }
           />
         </div>
@@ -138,6 +138,22 @@ export default function PurchasesPage() {
               setForm({ ...form, gstNo: e.target.value })
             }
           />
+        </div>
+
+        {/* Invoice Type */}
+        <div>
+          <label className="text-sm font-medium">Type</label>
+          <select
+            className="border border-gray-300 p-2 w-full"
+            value={form.invoiceType}
+            onChange={(e) =>
+              setForm({ ...form, invoiceType: e.target.value })
+            }
+          >
+            <option value="">Select Type</option>
+            <option value="I">Invoice</option>
+            <option value="C">Challan</option>
+          </select>
         </div>
 
         {/* Invoice No */}
@@ -177,20 +193,7 @@ export default function PurchasesPage() {
           />
         </div>
 
-        {/* Invoice Type */}
-        <div>
-          <label className="text-sm font-medium">Invoice Type</label>
-          <select
-            className="border border-gray-300 p-2 w-full"
-            value={form.invoiceType}
-            onChange={(e) =>
-              setForm({ ...form, invoiceType: e.target.value })
-            }
-          >
-            <option value="I">Invoice</option>
-            <option value="C">Challan</option>
-          </select>
-        </div>
+        
 
       </div>
 
