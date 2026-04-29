@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { savePurchase } from "../../api/purchaseApi";
 import toast from "react-hot-toast";
+import deleteIcon from "../../assets/delete_Icon.png";
 
 export default function PurchasesPage() {
   // ✅ Separate form state (header)
@@ -15,14 +16,32 @@ export default function PurchasesPage() {
 
   // ✅ Items state (table)
   const [items, setItems] = useState([
-    { itemCode: "", itemDesc: "", hsnCode: "", rateDp: "", quantity: "", gstValue: "", totalDp: "", totalPrice: "" },
+    {
+      itemCode: "",
+      itemDesc: "",
+      hsnCode: "",
+      rateDp: "",
+      quantity: "",
+      gstValue: "",
+      totalDp: "",
+      totalPrice: "",
+    },
   ]);
 
   // ✅ Add new row
   const addRow = () => {
     setItems([
       ...items,
-      { itemCode: "", itemDesc: "", hsnCode: "", rateDp: "", quantity: "", gstValue: "", totalDp: "", totalPrice: "" },
+      {
+        itemCode: "",
+        itemDesc: "",
+        hsnCode: "",
+        rateDp: "",
+        quantity: "",
+        gstValue: "",
+        totalDp: "",
+        totalPrice: "",
+      },
     ]);
   };
 
@@ -66,8 +85,18 @@ export default function PurchasesPage() {
     setItems(updated);
   };
 
+  // Delete Function for Row
+  const deleteRow = (index) => {
+    if (items.length === 1) return;
+    const updated = items.filter((_, i) => i !== index);
+    setItems(updated);
+  };
   // ✅ Save API call
   const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error("Please fill the required fields");
+      return;
+    }
     try {
       const payload = {
         ...form,
@@ -89,19 +118,56 @@ export default function PurchasesPage() {
 
       // reset
       setForm({
-        companyName: "", gstNo: "",
+        companyName: "",
+        gstNo: "",
         invoiceNo: "",
         invoiceDate: "",
         invoiceType: "",
         gstPercentage: "",
       });
       setItems([
-        { itemCode: "", itemDesc: "", hsnCode: "", rateDp: "", quantity: "", gstValue: "", totalDp: "", totalPrice: "" },
+        {
+          itemCode: "",
+          itemDesc: "",
+          hsnCode: "",
+          rateDp: "",
+          quantity: "",
+          gstValue: "",
+          totalDp: "",
+          totalPrice: "",
+        },
       ]);
     } catch (error) {
       console.error(error);
       toast.error("Error saving purchase");
     }
+  };
+
+  const validateForm = () => {
+    if (
+      !form.companyName ||
+      !form.gstNo ||
+      !form.invoiceNo ||
+      !form.invoiceDate ||
+      !form.invoiceType ||
+      !form.gstPercentage
+    ) {
+      return false;
+    }
+
+    for (let item of items) {
+      if (
+        !item.itemCode ||
+        !item.itemDesc ||
+        !item.hsnCode ||
+        !item.rateDp ||
+        !item.quantity
+      ) {
+        return false;
+      }
+    }
+
+    return true;
   };
 
   return (
@@ -115,16 +181,17 @@ export default function PurchasesPage() {
 
       {/* ✅ Header Inputs */}
       <div className="grid grid-cols-6 gap-3 items-end">
-
         {/* Company */}
         <div>
-          <label className="text-sm font-medium">Company</label>
+          <label className="text-sm font-medium">
+            Company<span className="text-red-500">*</span>
+          </label>
           <input
-            className="border border-gray-300 p-2 w-full"
+            className={`border p-2 w-full ${
+              !form.companyName ? "border-red-500" : "border-gray-300"
+            }`}
             value={form.companyName}
-            onChange={(e) =>
-              setForm({ ...form, companyName: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, companyName: e.target.value })}
           />
         </div>
 
@@ -134,9 +201,7 @@ export default function PurchasesPage() {
           <input
             className="border border-gray-300 p-2 w-full"
             value={form.gstNo}
-            onChange={(e) =>
-              setForm({ ...form, gstNo: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, gstNo: e.target.value })}
           />
         </div>
 
@@ -146,11 +211,9 @@ export default function PurchasesPage() {
           <select
             className="border border-gray-300 p-2 w-full"
             value={form.invoiceType}
-            onChange={(e) =>
-              setForm({ ...form, invoiceType: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, invoiceType: e.target.value })}
           >
-            <option value="">Select Type</option>
+            {/* <option value="">Select Type</option> */}
             <option value="I">Invoice</option>
             <option value="C">Challan</option>
           </select>
@@ -158,26 +221,31 @@ export default function PurchasesPage() {
 
         {/* Invoice No */}
         <div>
-          <label className="text-sm font-medium">Invoice No</label>
+          <label className="text-sm font-medium">
+            {form.invoiceType === "C" ? "Challan No" : "Invoice No"}
+            <span className="text-red-500">*</span>
+          </label>
           <input
-            className="border border-gray-300 p-2 w-full"
+            className={`border p-2 w-full ${
+              !form.companyName ? "border-red-500" : "border-gray-300"
+            }`}
             value={form.invoiceNo}
-            onChange={(e) =>
-              setForm({ ...form, invoiceNo: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, invoiceNo: e.target.value })}
           />
         </div>
 
         {/* Invoice Date */}
         <div>
-          <label className="text-sm font-medium">Invoice Date</label>
+          <label className="text-sm font-medium">
+            {form.invoiceType === "C" ? "Challan Date" : "Invoice Date"}<span className="text-red-500">*</span>
+          </label>
           <input
             type="date"
-            className="border border-gray-300 p-2 w-full"
+            className={`border p-2 w-full ${
+              !form.companyName ? "border-red-500" : "border-gray-300"
+            }`}
             value={form.invoiceDate}
-            onChange={(e) =>
-              setForm({ ...form, invoiceDate: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, invoiceDate: e.target.value })}
           />
         </div>
 
@@ -192,15 +260,12 @@ export default function PurchasesPage() {
             }
           />
         </div>
-
-        
-
       </div>
 
       {/* ✅ Table */}
       <div className="overflow-x-auto border border-gray-300">
         <table className="min-w-full text-sm border-collapse">
-          <thead className="bg-slate-100">
+          <thead className="bg-slate-100 ">
             <tr>
               {[
                 "Item Code",
@@ -211,8 +276,12 @@ export default function PurchasesPage() {
                 "GST Value",
                 "Total DP",
                 "Total Price",
+                "    ",
               ].map((head) => (
-                <th key={head} className="border border-gray-300 p-2 text-left font-semibold">
+                <th
+                  key={head}
+                  className="border border-gray-300 p-2 text-center font-semibold"
+                >
                   {head}
                 </th>
               ))}
@@ -222,11 +291,12 @@ export default function PurchasesPage() {
           <tbody>
             {items.map((item, index) => (
               <tr key={index} className="hover:bg-gray-50">
-
                 {/* Item Code */}
                 <td className="border border-gray-300 p-1">
                   <input
-                    className="w-full p-1 outline-none"
+                    className={`w-full p-1 outline-none text-center ${
+                      !item.itemCode ? "border border-red-500" : ""
+                    }`}
                     value={item.itemCode || ""}
                     onChange={(e) =>
                       updateRow(index, "itemCode", e.target.value)
@@ -237,7 +307,9 @@ export default function PurchasesPage() {
                 {/* Item Description */}
                 <td className="border border-gray-300 p-1">
                   <input
-                    className="w-full p-1 outline-none"
+                    className={`w-full p-1 outline-none text-left ${
+                      !item.itemDesc ? "border border-red-500" : ""
+                    }`}
                     value={item.itemDesc || ""}
                     onChange={(e) =>
                       updateRow(index, "itemDesc", e.target.value)
@@ -248,7 +320,9 @@ export default function PurchasesPage() {
                 {/* HSN */}
                 <td className="border border-gray-300 p-1">
                   <input
-                    className="w-full p-1 outline-none"
+                    className={`w-full p-1 outline-none text-center ${
+                      !item.hsnCode ? "border border-red-500" : ""
+                    }`}
                     value={item.hsnCode || ""}
                     onChange={(e) =>
                       updateRow(index, "hsnCode", e.target.value)
@@ -260,11 +334,11 @@ export default function PurchasesPage() {
                 <td className="border border-gray-300 p-1">
                   <input
                     type="number"
-                    className="w-full p-1 outline-none"
+                    className={`w-full p-1 outline-none text-right ${
+                      !item.rateDp ? "border border-red-500" : ""
+                    }`}
                     value={item.rateDp || ""}
-                    onChange={(e) =>
-                      updateRow(index, "rateDp", e.target.value)
-                    }
+                    onChange={(e) => updateRow(index, "rateDp", e.target.value)}
                   />
                 </td>
 
@@ -272,7 +346,9 @@ export default function PurchasesPage() {
                 <td className="border border-gray-300 p-1">
                   <input
                     type="number"
-                    className="w-full p-1 outline-none"
+                    className={`w-full p-1 outline-none text-right ${
+                      !item.quantity ? "border border-red-500" : ""
+                    }`}
                     value={item.quantity || ""}
                     onChange={(e) =>
                       updateRow(index, "quantity", e.target.value)
@@ -283,7 +359,7 @@ export default function PurchasesPage() {
                 {/* GST Value (auto) */}
                 <td className="border border-gray-300 p-1">
                   <input
-                    className="w-full p-1 outline-none"
+                    className="w-full p-1 outline-none text-right"
                     value={item.gstValue || 0}
                     readOnly
                   />
@@ -292,7 +368,7 @@ export default function PurchasesPage() {
                 {/* Total DP */}
                 <td className="border border-gray-300 p-1">
                   <input
-                    className="w-full p-1 outline-none"
+                    className="w-full p-1 outline-none text-right"
                     value={item.totalDp || 0}
                     readOnly
                   />
@@ -301,12 +377,26 @@ export default function PurchasesPage() {
                 {/* Total Price */}
                 <td className="border border-gray-300 p-1">
                   <input
-                    className="w-full p-1 outline-none"
+                    className="w-full p-1 outline-none text-right"
                     value={item.totalPrice || 0}
                     readOnly
                   />
                 </td>
+                {/*Delete Button*/}
+                <td className="relative border border-gray-300 p-2 pr-0">
+                  <input
+                    className="w-full px-2 py-1 bg-transparent outline-none"
+                  />
 
+                  {/* Delete Icon */}
+                  <button
+                    type="button"
+                    onClick={() => deleteRow(index)}
+                    className="absolute right-6 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100 hover:bg-red-100 p-1 rounded-full transition"
+                  >
+                    <img src={deleteIcon} alt="delete" className="w-4 h-4" />
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -314,7 +404,7 @@ export default function PurchasesPage() {
       </div>
 
       {/* ✅ Buttons */}
-      <div className="flex gap-3">
+      <div className="flex justify-end gap-3">
         <button
           onClick={addRow}
           className="bg-slate-800 text-white px-4 py-3 
