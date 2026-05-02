@@ -1,7 +1,21 @@
-import axios from "axios";
+const BASE_URL= "https://dev.starserviceinventory.cloud/api"
 
-const API = axios.create({
-  baseURL: "https://dev.starserviceinventory.cloud/api", // change in production
-});
+export const savePurchase = async (payload) => {
+  console.log("TOKEN:", localStorage.getItem("token")); //getting the correct token
+  const token = localStorage.getItem("token");
 
-export const savePurchase = (data) => API.post("/purchase/save", data);
+  const res = await fetch(`${BASE_URL}/purchase/save`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, // ✅ IMPORTANT
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to save purchase");
+  }
+
+  return res.json();
+};
