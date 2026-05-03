@@ -33,8 +33,12 @@ export default function LoginPage() {
       }
 
       if (res.ok) {
+        const expiryTime = Date.now() + 12 * 60 * 60 * 1000; // 12 hours
+
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data));
+        localStorage.setItem("expiry", expiryTime.toString()); // ✅ store expiry
+
         navigate("/dashboard");
       } else {
         console.error("Backend error:", data);
