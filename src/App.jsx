@@ -9,6 +9,8 @@ import StockSearchPage from "./pages/stock/StockSearchPage";
 import ReportsPage from "./pages/reports/ReportsPage";
 import AdminPage from "./pages/admin/AdminPage";
 
+import ProtectedRoute from "./components/protectedRoute";
+
 import { Toaster } from "react-hot-toast";
 
 
@@ -16,11 +18,19 @@ import { Toaster } from "react-hot-toast";
 export default function App() {
   return (
     <>
-      <Toaster position="top-right" toastOptions={{duration: 5000}} reverseOrder={false} />
+      <Toaster position="top-right" toastOptions={{ duration: 5000 }} reverseOrder={false} />
 
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<AppLayout />}>
+
+        <Route path="/login" element={<LoginPage />}/>
+
+        <Route path="/" element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+        >
+
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="purchases" element={<PurchasesPage />} />
