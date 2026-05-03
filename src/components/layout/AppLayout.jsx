@@ -9,9 +9,9 @@ import {
   Search,
   FileSpreadsheet,
   Settings,
-  Package2
+  Package2,
 } from "lucide-react";
-
+const currentUser = JSON.parse(localStorage.getItem("user"));
 const links = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/purchases", label: "Purchases", icon: ShoppingCart },
@@ -19,7 +19,7 @@ const links = [
   { to: "/transfers", label: "Stock Transfer", icon: ArrowLeftRight },
   { to: "/stock-search", label: "Stock Search", icon: Search },
   { to: "/reports", label: "Reports", icon: FileSpreadsheet },
-  { to: "/admin", label: "Admin", icon: Settings },
+  { to: "/admin", label: "Admin", icon: Settings, roles: ["ROLE_ADMIN"] },
 ];
 
 export default function AppLayout() {

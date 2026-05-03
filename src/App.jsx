@@ -13,6 +13,8 @@ import ProtectedRoute from "./components/protectedRoute";
 
 import { Toaster } from "react-hot-toast";
 
+
+
 export default function App() {
   return (
     <>
