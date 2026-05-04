@@ -1,4 +1,5 @@
 import SessionTimer from "../SessionTimer";
+import comlogo from "../../assets/comlogo3.png";
 
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
@@ -31,16 +32,20 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-12">
+    <div className="min-h-screen flex">
       {/* ✅ SIDEBAR */}
-      <aside className="col-span-12 md:col-span-3 lg:col-span-2 bg-slate-900 text-white p-5">
+      <aside className="fixed top-0 left-0 h-screen w-64 bg-slate-900 text-white p-5 flex flex-col">
         <div>
           <div className="flex items-center gap-3 mb-8">
-            <div className="bg-blue-600 p-2 rounded-xl">
-              <Package2 size={24} />
+            <div className="rounded-xl">
+              <img
+                src={comlogo}
+                alt="Logo"
+                className="h-20 w-auto"
+              />
             </div>
             <div>
-              <h1 className="text-lg font-bold">Star Service</h1>
+              <h1 className="text-xl font-bold">Star Service</h1>
               <p className="text-xs text-slate-300">Inventory System</p>
             </div>
           </div>
@@ -65,7 +70,7 @@ export default function AppLayout() {
         </div>
 
         {/* 🔥 LOGOUT AT BOTTOM */}
-        <div className="mt-auto pt-80 border-t border-slate-700">
+        <div className="mt-auto pt-50 border-t border-slate-700">
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 
@@ -85,26 +90,17 @@ export default function AppLayout() {
       </aside>
 
       {/* ✅ MAIN AREA */}
-      <main className="col-span-12 md:col-span-9 lg:col-span-10 p-4 md:p-6">
+      <main className="ml-64 w-[calc(100%-16rem)] min-h-screen bg-gray-100">
         {/* 🔥 TOP BAR */}
         <div className="flex justify-between items-center bg-white px-6 py-3 border-b shadow-sm">
 
           {/* LEFT → Session Timer */}
           {/* <SessionTimer /> */}
-
-          {/* RIGHT → Logout */}
-          {/* <button
-            onClick={handleLogout}
-            className="bg-red-500 text-white px-4 py-2 rounded-lg 
-            hover:bg-red-600 transition duration-200"
-          >
-            Logout
-          </button> */}
         </div>
 
         {/* CONTENT */}
-        <div className="p-4 md:p-6 flex-1">
-          <div className="bg-white rounded-2xl shadow-sm min-h-[calc(100vh-3rem)] p-4 md:p-6">
+        <div className="p-6">
+          <div className="bg-white rounded-2xl shadow-sm min-h-[calc(100vh-3rem)] p-4 md:p-6 overflow-y-auto">
             <Outlet />
           </div>
         </div>
