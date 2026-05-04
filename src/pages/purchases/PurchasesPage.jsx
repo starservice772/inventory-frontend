@@ -167,6 +167,20 @@ export default function PurchasesPage() {
           totalPrice: "",
         },
       ]);
+
+      // ✅ 🔥 MOST IMPORTANT FIX
+      setTouched({
+        companyName: false,
+        invoiceNo: false,
+        invoiceDate: false,
+        invoiceType: false,
+        gstPercentage: false,
+        itemCode: false,
+        itemDesc: false,
+        hsnCode: false,
+        rateDp: false,
+        quantity: false,
+      });
     } catch (error) {
       console.error(error);
       toast.error("Error saving purchase");
@@ -296,8 +310,8 @@ export default function PurchasesPage() {
           <label className="text-sm font-medium">GST (in %)</label>
           <input
             className={`border p-2 w-full ${touched.gstPercentage && !form.gstPercentage
-                ? "border-red-500"
-                : "border-gray-300"
+              ? "border-red-500"
+              : "border-gray-300"
               }`}
             value={form.gstPercentage}
             onChange={(e) =>

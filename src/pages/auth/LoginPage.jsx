@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import comlogo from "../../assets/comlogo3.png";
 import toast from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -10,6 +11,8 @@ export default function LoginPage() {
     password: "",
     company: "GODREJ",
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,7 +95,7 @@ export default function LoginPage() {
               onChange={(e) => setForm({ ...form, company: e.target.value })}>
 
               <option value="GODREJ">Godrej</option>
-              <option value="AO_SMITH">AO Smith</option>
+              <option value="AOSMITH">AO Smith</option>
             </select>
           </div>
 
@@ -117,15 +120,26 @@ export default function LoginPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 
               focus:outline-none focus:ring-2 focus:ring-blue-500 
               focus:border-blue-500 transition duration-200"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-            />
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 
+              text-gray-500 hover:text-gray-700 transition"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           {/* Options */}
