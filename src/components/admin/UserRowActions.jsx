@@ -1,7 +1,7 @@
 import { MoreHorizontal } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
-export default function UserRowActions({ user, onEdit, onDeactivate }) {
+export default function UserRowActions({ user, onEdit, onDeactivate, onToggleStatus }) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -18,7 +18,6 @@ export default function UserRowActions({ user, onEdit, onDeactivate }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
 
   return (
     <div ref={dropdownRef} className="relative">
@@ -44,7 +43,7 @@ export default function UserRowActions({ user, onEdit, onDeactivate }) {
           {user.status === "ACTIVE" ? (
             <button
               onClick={() => {
-                onDeactivate(user.uuid);
+                onToggleStatus(user);
                 setOpen(false);
               }}
               className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
@@ -54,7 +53,7 @@ export default function UserRowActions({ user, onEdit, onDeactivate }) {
           ) : (
             <button
               onClick={() => {
-                onDeactivate(user.uuid);
+                onToggleStatus(user);
                 setOpen(false);
               }}
               className="w-full text-left px-4 py-2 text-green-600 hover:bg-green-50"

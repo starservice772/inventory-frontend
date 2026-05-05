@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import UserForm from "../UserForm"; // adjust path if needed
 import EditUserForm from "../EditUserForm";
 
-import { getUsers, deactivateUser, updateUser } from "../../api/userService";
+import { getUsers, changeUserStatus, updateUser } from "../../api/userService";
 
 import SearchBar from "./SearchBar";
 import Pagination from "./Pagination";
@@ -12,49 +12,133 @@ import UserRowActions from "./UserRowActions";
 export default function UserTable() {
   const [mode, setMode] = useState("edit"); // or "edit"
   const [showForm, setShowForm] = useState(false);
-  const [users, setUsers] = useState([]);
-  const [filtered, setFiltered] = useState([]);
+  // const [users, setUsers] = useState([]);
 
+  // const [allUsers, setAllUsers] = useState([]); // full data
+  // const [filtered, setFiltered] = useState([]); // search result
+  const [users, setUsers] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-
+  const [inputValue, setInputValue] = useState("");
   const [search, setSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
 
+  const pageSize = 10;
+
+  // const paginatedUsers = filtered.slice(page * pageSize, (page + 1) * pageSize);
+
   const fetchUsers = async () => {
     try {
-      const data = await getUsers(page, 10);
+      const data = await getUsers(page, 10, search);
 
-      setUsers(data.response);
-      setFiltered(data.response);
-      setTotalPages(data.totalPages);
+      setUsers(data.response || []);
+      setTotalPages(data.totalPages || 1);
     } catch {
       toast.error("Failed to fetch users");
+      setUsers([]);
     }
   };
 
   useEffect(() => {
     fetchUsers();
-  }, [page]);
+  }, [page, search]);
 
   useEffect(() => {
-    const q = search.toLowerCase();
+    setPage(0);
+  }, [search]);
 
-    setFiltered(
-      users.filter(
-        (u) =>
-          u.name.toLowerCase().includes(q) ||
-          u.email.toLowerCase().includes(q) ||
-          u.username.toLowerCase().includes(q),
-      ),
-    );
-  }, [search, users]);
+  const handleSearchChange = (value) => {
+    setInputValue(value); // always update input
 
-  const handleDeactivate = async (id) => {
+    if (value.length >= 3) {
+      setSearch(value); // trigger search
+    } else if (value.length === 0) {
+      setSearch(""); // reset when cleared
+    }
+  };
+  // const fetchUsers = async () => {
+  //   try {
+  //     const data = await getUsers(page, 10);
+
+  //     setUsers(data.response);
+  //     setFiltered(data.response);
+  //     setTotalPages(data.totalPages);
+  //   } catch {
+  //     toast.error("Failed to fetch users");
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchUsers();
+  // }, [page]);
+
+  // useEffect(() => {
+  //   const q = search.toLowerCase();
+
+  //   setFiltered(
+  //     users.filter(
+  //       (u) =>
+  //         u.name.toLowerCase().includes(q) ||
+  //         u.email.toLowerCase().includes(q) ||
+  //         u.username.toLowerCase().includes(q),
+  //     ),
+  //   );
+  // }, [search, users]);
+
+  // const fetchAllUsers = async () => {
+  //   try {
+  //     const data = await getUsers();
+  //     const usersArray = data?.response || [];
+
+  //     setAllUsers(usersArray);
+  //     setFiltered(usersArray); // initial view
+  //   } catch {
+  //     toast.error("Failed to fetch users");
+  //     setAllUsers([]);
+  //     setFiltered([]);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchAllUsers();
+  // }, []);
+
+  // useEffect(() => {
+  //   const q = search.toLowerCase();
+
+  //   // 👉 If less than 3 chars → show all data
+  //   if (q.length < 3) {
+  //     setFiltered(allUsers);
+  //     return;
+  //   }
+
+  //   const result = allUsers.filter(
+  //     (u) =>
+  //       u.name?.toLowerCase().includes(q) ||
+  //       u.email?.toLowerCase().includes(q) ||
+  //       u.username?.toLowerCase().includes(q),
+  //   );
+
+  //   setFiltered(result);
+  // }, [search, allUsers]);
+
+  // useEffect(() => {
+  //   setPage(0);
+  // }, [search]);
+
+  // useEffect(() => {
+  //   setTotalPages(Math.ceil(filtered.length / pageSize) || 1);
+  // }, [filtered]);
+
+  const handleToggleStatus = async (user) => {
     try {
-      await deactivateUser(id);
-      toast.success("User deactivated ✅");
-      fetchUsers();
+      await changeUserStatus(user.uuid);
+
+      toast.success(
+        user.status === "ACTIVE" ? "User deactivated ✅" : "User activated ✅",
+      );
+
+      fetchAllUsers();
     } catch (err) {
       toast.error(err.message || "Failed ❌");
     }
@@ -64,7 +148,7 @@ export default function UserTable() {
     <div className="bg-white rounded-2xl border shadow-sm mt-6">
       {/* Header */}
       <div className="p-5 flex justify-between items-center border-b">
-        <SearchBar value={search} onChange={setSearch} />
+        <SearchBar value={inputValue} onChange={handleSearchChange} />
 
         <button
           onClick={() => {
@@ -94,7 +178,7 @@ export default function UserTable() {
         </thead>
 
         <tbody>
-          {filtered.map((user) => (
+          {users.map((user) => (
             <tr key={user.uuid} className="border-t hover:bg-slate-50">
               <td className="p-4 font-medium">{user.userId}</td>
               <td className="p-4 font-medium">{user.name}</td>
@@ -125,7 +209,7 @@ export default function UserTable() {
                     setSelectedUser(u);
                     setShowForm(true);
                   }}
-                  onDeactivate={handleDeactivate}
+                  onToggleStatus={handleToggleStatus}
                 />
               </td>
             </tr>
@@ -152,14 +236,14 @@ export default function UserTable() {
                 onSuccess={() => {
                   setShowForm(false);
                   setSelectedUser(null);
-                  fetchUsers();
+                  fetchAllUsers();
                 }}
               />
             ) : (
               <UserForm
                 onSuccess={() => {
                   setShowForm(false);
-                  fetchUsers();
+                  fetchAllUsers();
                 }}
               />
             )}
