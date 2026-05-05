@@ -56,11 +56,7 @@ export default function AppLayout() {
         <div>
           <div className="flex items-center gap-3 mb-8">
             <div className="rounded-xl">
-              <img
-                src={comlogo}
-                alt="Logo"
-                className="h-20 w-auto"
-              />
+              <img src={comlogo} alt="Logo" className="h-20 w-auto" />
             </div>
             <div>
               <h1 className="text-xl font-bold">Star Service</h1>
@@ -153,7 +149,6 @@ export default function AppLayout() {
             <Outlet />
           </div>
         </div>
-
       </main>
     </div>
   );

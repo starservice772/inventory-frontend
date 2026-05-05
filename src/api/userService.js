@@ -18,33 +18,53 @@ export const createUser = async (userData) => {
   return response.json();
 };
 
-export const deactivateUser = async (id) => {
+// export const deactivateUser = async (id) => {
+//   const token = localStorage.getItem("token");
+
+//   const res = await fetch(`${BASE_URL}/users/changeStatus?id=${id}`, {
+//     method: "POST",
+//     headers: {
+//       Authorization: `Bearer ${token}`,
+//     },
+//   });
+
+//   const data = await res.json().catch(() => ({}));
+//   const payload = JSON.parse(atob(token.split(".")[1]));
+//   console.log(payload);
+
+//   if (!res.ok) {
+//     throw new Error(data.message || "Deactivate failed");
+//   }
+
+//   return data;
+// };
+
+export const changeUserStatus = async (id) => {
   const token = localStorage.getItem("token");
+  const response = await fetch(
+    `${BASE_URL}/users/changeStatus?id=${id}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+         Authorization: `Bearer ${token}`
+      },
+    }
+  );
 
-  const res = await fetch(`${BASE_URL}/users/changeStatus?id=${id}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const data = await res.json().catch(() => ({}));
-  const payload = JSON.parse(atob(token.split(".")[1]));
-  console.log(payload);
-
-  if (!res.ok) {
-    throw new Error(data.message || "Deactivate failed");
+  if (!response.ok) {
+    throw new Error("Failed to change user status");
   }
 
-  return data;
+  return await response.json(); // if backend returns JSON
 };
 
 // ✅ GET USERS
-export const getUsers = async (page = 0, size = 10) => {
+export const getUsers = async (page = 0, size = 10, search="") => {
   const token = localStorage.getItem("token");
   // console.log("TOKEN:", token); // 🔍 check this
 
-  const res = await fetch(`${BASE_URL}/users/getAll/${page}/${size}`, {
+  const res = await fetch(`${BASE_URL}/users/getAll/${page}/${size}?search=${encodeURIComponent(search)}`, {
     method: "GET",
     headers: {
       ...(token && { Authorization: `Bearer ${token}` }),
