@@ -9,7 +9,7 @@ let defaultCompany = "";
 try {
   const payload = JSON.parse(atob(token.split(".")[1]));
   defaultCompany = payload.company || "";
-} catch {}
+} catch { }
 
 function UserForm({ user, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -24,6 +24,7 @@ function UserForm({ user, onSuccess }) {
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     setFormData({
@@ -33,21 +34,41 @@ function UserForm({ user, onSuccess }) {
   };
 
   const validate = () => {
-    if (!formData.username) return "Username is required";
-    if (!formData.password) return "Password is required";
-    if (!formData.email.includes("@")) return "Invalid email";
-    if (formData.phone.length < 10) return "Invalid phone number";
-    return null;
+    let errors = {};
+
+    if (!formData.username) errors.username = "Username is required";
+    if (!formData.password) errors.password = "Password is required";
+    if (!formData.name) errors.name = "Name is required";
+
+    if (!formData.email) {
+      errors.email = "Email is required";
+    } else if (!formData.email.includes("@")) {
+      errors.email = "Invalid email";
+    }
+
+    if (!formData.phone) {
+      errors.phone = "Phone is required";
+    } else if (formData.phone.length < 10) {
+      errors.phone = "Invalid phone number";
+    }
+
+    if (!formData.company) errors.company = "Company is required";
+    if (!formData.role) errors.role = "Role is required";
+
+    return errors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const error = validate();
-    if (error) {
-      toast.error(error);
+    const validationErrors = validate();
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
+
+    setErrors({}); // clear errors if valid
 
     try {
       setLoading(true);
@@ -99,48 +120,6 @@ function UserForm({ user, onSuccess }) {
     }
   }, [user]);
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     setLoading(true);
-
-  //     const token = localStorage.getItem("token");
-
-  //     const url = user ? `${BASE_URL}/users/update` : `${BASE_URL}/users/save`;
-
-  //     const method = "POST";
-
-  //     const body = user
-  //       ? {
-  //           id: user.uuid, // 🔥 important
-  //           name: formData.name,
-  //           email: formData.email,
-  //           phone: formData.phone,
-  //         }
-  //       : formData;
-
-  //     const res = await fetch(url, {
-  //       method,
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //       body: JSON.stringify(body),
-  //     });
-
-  //     if (!res.ok) throw new Error();
-
-  //     toast.success(user ? "User updated ✅" : "User created ✅");
-
-  //     onSuccess && onSuccess();
-  //   } catch {
-  //     toast.error("Operation failed ❌");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   return (
     <div className="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-md border">
       <h2 className="text-xl font-semibold mb-4">Create User</h2>
@@ -156,8 +135,12 @@ function UserForm({ user, onSuccess }) {
             name="username"
             value={formData.username}
             onChange={handleChange}
-            className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-500"
+            className={`w-full border p-2 rounded mt-1 
+            ${errors.username ? "border-red-500" : "border-gray-300"}`}
           />
+          {errors.username && (
+            <p className="text-red-500 text-xs mt-1">{errors.username}</p>
+          )}
         </div>
 
         {/* Password */}
@@ -169,8 +152,12 @@ function UserForm({ user, onSuccess }) {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full border p-2 rounded mt-1"
+              className={`w-full border p-2 rounded mt-1 
+              ${errors.password ? "border-red-500" : "border-gray-300"}`}
             />
+            {errors.password && (
+              <p className="text-red-500 text-xs">{errors.password}</p>
+            )}
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
@@ -199,8 +186,12 @@ function UserForm({ user, onSuccess }) {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full border p-2 rounded mt-1"
+            className={`w-full border p-2 rounded mt-1 
+    ${errors.email ? "border-red-500" : "border-gray-300"}`}
           />
+          {errors.email && (
+            <p className="text-red-500 text-xs">{errors.email}</p>
+          )}
         </div>
 
         {/* Phone */}
@@ -211,8 +202,12 @@ function UserForm({ user, onSuccess }) {
             value={formData.phone}
             onChange={handleChange}
             type="number"
-            className="w-full border p-2 rounded mt-1"
+            className={`w-full border p-2 rounded mt-1 
+    ${errors.phone ? "border-red-500" : "border-gray-300"}`}
           />
+          {errors.phone && (
+            <p className="text-red-500 text-xs">{errors.phone}</p>
+          )}
         </div>
 
         {/* Company */}
@@ -222,8 +217,12 @@ function UserForm({ user, onSuccess }) {
             name="company"
             value={formData.company}
             onChange={handleChange}
-            className="w-full border p-2 rounded mt-1"
+            className={`w-full border p-2 rounded mt-1 
+    ${errors.company ? "border-red-500" : "border-gray-300"}`}
           />
+          {errors.company && (
+            <p className="text-red-500 text-xs">{errors.company}</p>
+          )}
         </div>
 
         {/* Role */}
@@ -237,6 +236,7 @@ function UserForm({ user, onSuccess }) {
           >
             <option value="ROLE_MANAGER">Manager</option>
             <option value="ROLE_ADMIN">Admin</option>
+            <option value="ROLE_CRM">CRM</option>
           </select>
         </div>
 

@@ -42,7 +42,7 @@ export const deactivateUser = async (id) => {
 // ✅ GET USERS
 export const getUsers = async (page = 0, size = 10) => {
   const token = localStorage.getItem("token");
-  console.log("TOKEN:", token); // 🔍 check this
+  // console.log("TOKEN:", token); // 🔍 check this
 
   const res = await fetch(`${BASE_URL}/users/getAll/${page}/${size}`, {
     method: "GET",
