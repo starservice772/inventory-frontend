@@ -8,6 +8,7 @@ import TransferPage from "./pages/transfers/TransferPage";
 import StockSearchPage from "./pages/stock/StockSearchPage";
 import ReportsPage from "./pages/reports/ReportsPage";
 import AdminPage from "./pages/admin/AdminPage";
+import EmployeePage from "./pages/employee/EmployeePage";
 
 import ProtectedRoute from "./components/protectedRoute";
 
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="stock-search" element={<StockSearchPage />} />
           <Route path="reports" element={<ReportsPage />} />
           <Route path="admin" element={<AdminPage />} />
+          <Route path="employee" element={<EmployeePage />} />
         </Route>
       </Routes>
     </>
