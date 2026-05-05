@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { LogIn } from "lucide-react";
 
 const token = localStorage.getItem("token");
+const BASE_URL = "https://dev.starserviceinventory.cloud/api";
 
 let defaultCompany = "";
 try {

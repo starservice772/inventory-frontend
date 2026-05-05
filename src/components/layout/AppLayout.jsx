@@ -38,11 +38,7 @@ export default function AppLayout() {
         <div>
           <div className="flex items-center gap-3 mb-8">
             <div className="rounded-xl">
-              <img
-                src={comlogo}
-                alt="Logo"
-                className="h-20 w-auto"
-              />
+              <img src={comlogo} alt="Logo" className="h-20 w-auto" />
             </div>
             <div>
               <h1 className="text-xl font-bold">Star Service</h1>
@@ -51,21 +47,29 @@ export default function AppLayout() {
           </div>
 
           <nav className="space-y-2">
-            {links.map(({ to, label, icon: Icon }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-xl transition ${isActive
-                    ? "bg-blue-600 text-white"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                  }`
-                }
-              >
-                <Icon size={18} />
-                <span>{label}</span>
-              </NavLink>
-            ))}
+            {links
+              .filter((link) => {
+                if (!link.roles) return true; // visible to all
+
+                const role = currentUser?.role?.toUpperCase();
+                return link.roles.some((r) => r.toUpperCase() === role);
+              })
+              .map(({ to, label, icon: Icon }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+                      isActive
+                        ? "bg-blue-600 text-white"
+                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    }`
+                  }
+                >
+                  <Icon size={18} />
+                  <span>{label}</span>
+                </NavLink>
+              ))}
           </nav>
         </div>
 
@@ -93,7 +97,6 @@ export default function AppLayout() {
       <main className="ml-64 w-[calc(100%-16rem)] min-h-screen bg-gray-100">
         {/* 🔥 TOP BAR */}
         <div className="flex justify-between items-center bg-white px-6 py-3 border-b shadow-sm">
-
           {/* LEFT → Session Timer */}
           {/* <SessionTimer /> */}
         </div>
@@ -104,7 +107,6 @@ export default function AppLayout() {
             <Outlet />
           </div>
         </div>
-
       </main>
     </div>
   );
