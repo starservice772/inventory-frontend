@@ -27,7 +27,7 @@ export default function UserTable() {
 
   // const paginatedUsers = filtered.slice(page * pageSize, (page + 1) * pageSize);
 
-  const fetchUsers = async () => {
+  const fetchAllUsers = async () => {
     try {
       const data = await getUsers(page, 10, search);
 
@@ -40,7 +40,7 @@ export default function UserTable() {
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchAllUsers();
   }, [page, search]);
 
   useEffect(() => {

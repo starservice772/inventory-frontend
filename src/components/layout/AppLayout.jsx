@@ -58,7 +58,6 @@ export default function AppLayout() {
                 <NavLink
                   key={to}
                   to={to}
-                  end={currentUser?.role?.toUpperCase() === "ROLE_ADMIN" ? "./admin" : (to === "/admin" ? "" : "")}
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-4 py-3 rounded-xl transition ${
                       isActive
