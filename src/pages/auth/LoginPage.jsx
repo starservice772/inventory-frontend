@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import comlogo from "../../assets/comlogo3.png";
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
+import loginUser from "../../api/loginApi";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -18,39 +19,24 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const BASE_URL = "https://dev.starserviceinventory.cloud/api";
-      const res = await fetch(`${BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
+      const data = await loginUser(form);
+      // 🔴 BLOCK INACTIVE USER (extra safety)
+      // if (data.status && data.status !== "ACTIVE") {
+      //   toast.error("Your account is deactivated");
+      //   return;
+      // }
 
-      let data = null;
+      const expiryTime = Date.now() + 12 * 60 * 60 * 1000; // 12 hours
 
-      try {
-        data = await res.json();
-      } catch {
-        console.log("Non-JSON response");
-      }
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data));
+      localStorage.setItem("expiry", expiryTime.toString()); // ✅ store expiry
 
-      if (res.ok) {
-        const expiryTime = Date.now() + 12 * 60 * 60 * 1000; // 12 hours
-
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data));
-        localStorage.setItem("expiry", expiryTime.toString()); // ✅ store expiry
-
-        navigate("/dashboard");
-      } else {
-        console.error("Backend error:", data);
-        toast.error(data?.message || "Login failed");
-      }
+      navigate("/dashboard");
 
     } catch (err) {
-      console.error("Network error:", err);
-      toast.error("Cannot connect to backend");
+      console.error(err.message);
+      toast.error(err.message || "Login failed");
     }
   };
 

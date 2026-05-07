@@ -229,72 +229,70 @@ function EmployeePage() {
     };
 
     return (
-        <div className="p-6">
-            <div className="bg-white rounded-2xl shadow-md border border-gray-300">
+        <div className="bg-white rounded-2xl shadow-md border border-gray-300">
 
-                {/* Top Bar */}
-                <div className="flex justify-between items-center p-4 border-b">
+            {/* Top Bar */}
+            <div className="flex justify-between items-center p-4 border-b">
 
-                    {/* Search */}
-                    <input
-                        type="text"
-                        placeholder="Search employee..."
-                        value={search}
-                        onChange={(e) => {
-                            setSearch(e.target.value);
-                            setPage(0); // reset to first page on search
-                        }}
-                        className="border border-gray-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-gray-400"
-                    />
+                {/* Search */}
+                <input
+                    type="text"
+                    placeholder="Search employee..."
+                    value={search}
+                    onChange={(e) => {
+                        setSearch(e.target.value);
+                        setPage(0); // reset to first page on search
+                    }}
+                    className="border border-gray-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                />
 
-                    {/* New User Button */}
-                    <button
-                        onClick={handleOpenCreateModal}
-                        className="bg-orange-500 text-white px-5 py-2 rounded-lg font-medium hover:bg-orange-600">
-                        New Employee
-                    </button>
-                </div>
+                {/* New User Button */}
+                <button
+                    onClick={handleOpenCreateModal}
+                    className="bg-orange-500 text-white px-5 py-2 rounded-lg font-medium hover:bg-orange-600">
+                    New Employee
+                </button>
+            </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+            {/* Table */}
+            <table className="w-full text-left">
 
-                        <thead className="bg-gray-100 text-gray-600 text-sm">
-                            <tr>
-                                <th className="p-3">Name</th>
-                                <th className="p-3">Phone</th>
-                                <th className="p-3">Employee Code</th>
-                                <th className="p-3">Gender</th>
-                                <th className="p-3">Company</th>
-                                <th className="p-3">Role</th>
-                                <th className="p-3">Status</th>
-                                <th className="p-3 text-right">Action</th>
-                            </tr>
-                        </thead>
+                <thead className="bg-slate-50 text-slate-600">
+                    <tr>
+                        <th className="p-4 text-left">Name</th>
+                        <th className="p-4 text-left">Phone</th>
+                        <th className="p-4 text-left">Employee Code</th>
+                        <th className="p-4 text-left">Gender</th>
+                        <th className="p-4 text-left">Company</th>
+                        <th className="p-4 text-left">Designation</th>
+                        <th className="p-4 text-left">Status</th>
+                        <th className="p-4 text-left">Action</th>
+                    </tr>
+                </thead>
 
-                        <tbody className="text-gray-700">
-                            {employees.map((emp) => (
-                                <tr key={emp.id} className="border-t hover:bg-gray-50 relative">
-                                    <td className="p-3">{emp.name}</td>
-                                    <td className="p-3">{emp.phone}</td>
-                                    <td className="p-3">{emp.employeeCode}</td>
-                                    <td className="p-3">{emp.gender}</td>
-                                    <td className="p-3">{emp.company}</td>
-                                    <td className="p-3">{emp.role}</td>
-                                    <td className="p-3">
-                                        <span
-                                            className={`px-2 py-1 text-xs rounded-full ${emp.status === "ACTIVE"
-                                                ? "bg-green-100 text-green-600"
-                                                : "bg-red-100 text-red-600"
-                                                }`}
-                                        >
-                                            {emp.status}
-                                        </span>
-                                    </td>
-                                    {/* Employee Actions */}
-                                    <td className="p-3 text-right relative">
+                <tbody>
+                    {employees.map((emp) => (
+                        <tr key={emp.id} className="border-t hover:bg-gray-50">
+                            <td className="p-3">{emp.name}</td>
+                            <td className="p-3">{emp.phone}</td>
+                            <td className="p-3">{emp.employeeCode}</td>
+                            <td className="p-3">{emp.gender}</td>
+                            <td className="p-3">{emp.company}</td>
+                            <td className="p-3">{emp.role}</td>
+                            <td className="p-3">
+                                <span
+                                    className={`px-2 py-1 text-xs rounded-full ${emp.status === "ACTIVE"
+                                        ? "bg-green-100 text-green-600"
+                                        : "bg-red-100 text-red-600"
+                                        }`}
+                                >
+                                    {emp.status}
+                                </span>
+                            </td>
+                            {/* Employee Actions */}
+                            <td>
 
-                                        {/* Three dots button */}
+                                {/* Three dots button
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -303,75 +301,73 @@ function EmployeePage() {
                                             className="text-xl px-2"
                                         >
                                             ⋮
-                                        </button>
-                                        {/* Employee Action Modal*/}
-                                        <ActionMenu
-                                            emp={emp}
-                                            openMenuId={openMenuId}
-                                            setOpenMenuId={setOpenMenuId}
-                                            handleEdit={handleEdit}
-                                            handleDelete={handleDelete}
-                                            handleToggleStatus={handleToggleStatus}
-                                        />
+                                        </button> */}
+                                {/* Employee Action Modal*/}
+                                <ActionMenu
+                                    emp={emp}
+                                    openMenuId={openMenuId}
+                                    setOpenMenuId={setOpenMenuId}
+                                    handleEdit={handleEdit}
+                                    handleDelete={handleDelete}
+                                    handleToggleStatus={handleToggleStatus}
+                                />
 
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    {/* Employee Update Modal */}
-                    <EditEmployeeModal
-                        showModal={showEditModal}
-                        setShowModal={setShowEditModal}
-                        form={form}
-                        handleChange={handleChange}
-                        handleUpdate={handleUpdate}
-                    />
-                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            {/* Employee Update Modal */}
+            <EditEmployeeModal
+                showModal={showEditModal}
+                setShowModal={setShowEditModal}
+                form={form}
+                handleChange={handleChange}
+                handleUpdate={handleUpdate}
+            />
 
-                {/* Create Employee Modal */}
-                <EmployeeModal
-                    key={form.id || "create"}
-                    showModal={showModal}
-                    setShowModal={setShowModal}
-                    form={form}
-                    handleChange={handleChange}
-                    handleSubmit={handleSubmit}
-                    onClose={() => setShowModal(false)}
-                />
+            {/* Create Employee Modal */}
+            <EmployeeModal
+                key={form.id || "create"}
+                showModal={showModal}
+                setShowModal={setShowModal}
+                form={form}
+                handleChange={handleChange}
+                handleSubmit={handleSubmit}
+                onClose={() => setShowModal(false)}
+            />
 
-                {/* Pagination */}
-                <div className="flex justify-end gap-3 p-4 border-t">
+            {/* Pagination */}
+            <div className="flex justify-end gap-3 p-4 border-t">
 
-                    <button
-                        disabled={page === 0}
-                        onClick={() => setPage((p) => Math.max(p - 1, 0))}
-                        className="px-4 py-2 border rounded-lg bg-gray-100 
+                <button
+                    disabled={page === 0}
+                    onClick={() => setPage((p) => Math.max(p - 1, 0))}
+                    className="px-4 py-2 border rounded-lg bg-gray-100 
                         hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed 
                         transition"
-                    >
-                        Prev
-                    </button>
+                >
+                    Prev
+                </button>
 
-                    {/* Page Info */}
-                    <span className="px-4 py-2 text-sm font-medium text-gray-700">
-                        Page {page + 1} / {totalPages || 1}
-                    </span>
+                {/* Page Info */}
+                <span className="px-4 py-2 text-sm font-medium text-gray-700">
+                    Page {page + 1} / {totalPages || 1}
+                </span>
 
-                    <button
-                        disabled={page + 1 >= totalPages}
-                        onClick={() => setPage((p) => p + 1)}
-                        className="px-4 py-2 border rounded-lg bg-gray-100 
+                <button
+                    disabled={page + 1 >= totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                    className="px-4 py-2 border rounded-lg bg-gray-100 
                         hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed 
                         transition"
-                    >
-                        Next
-                    </button>
-
-                </div>
+                >
+                    Next
+                </button>
 
             </div>
         </div>
+
     );
 };
 
