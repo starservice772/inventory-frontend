@@ -218,6 +218,7 @@ function UserForm({ user, onSuccess }) {
             name="company"
             value={formData.company}
             onChange={handleChange}
+            disabled
             className={`w-full border p-2 rounded mt-1 
     ${errors.company ? "border-red-500" : "border-gray-300"}`}
           />
