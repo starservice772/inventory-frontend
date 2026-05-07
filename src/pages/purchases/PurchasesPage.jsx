@@ -27,7 +27,6 @@ export default function PurchasesPage() {
     hsnCode: false,
     rateDp: false,
     quantity: false,
-
   });
 
   // ✅ Items state (table)
@@ -79,7 +78,7 @@ export default function PurchasesPage() {
     // ✅ Step 2: calculate ONLY if valid numbers
     if (!isNaN(rate) && !isNaN(qty) && !isNaN(gstPercent)) {
       const gstValue = rate * gstPercent * qty;
-      const totalDp = rate + (rate * gstPercent);
+      const totalDp = rate + rate * gstPercent;
       const totalPrice = qty * totalDp;
 
       updated[index] = {
@@ -109,7 +108,6 @@ export default function PurchasesPage() {
   };
   // ✅ Save API call
   const handleSave = async () => {
-
     // 🔴 Mark ALL required fields as touched
     setTouched({
       companyName: true,
@@ -231,13 +229,14 @@ export default function PurchasesPage() {
             Company<span className="text-red-500">*</span>
           </label>
           <input
-            className={`border p-2 w-full ${touched.companyName && !form.companyName ? "border-red-500" : "border-gray-300"
-              }`}
+            className={`border p-2 w-full ${
+              touched.companyName && !form.companyName
+                ? "border-red-500"
+                : "border-gray-300"
+            }`}
             value={form.companyName}
             onChange={(e) => setForm({ ...form, companyName: e.target.value })}
-            onBlur={() =>
-              setTouched({ ...touched, companyName: true })
-            }
+            onBlur={() => setTouched({ ...touched, companyName: true })}
           />
         </div>
 
@@ -255,15 +254,21 @@ export default function PurchasesPage() {
         <div>
           <label className="text-sm font-medium">Type</label>
           <select
-            className={`border p-2 w-full ${touched.invoiceType && !form.invoiceType
-              ? "border-red-500"
-              : "border-gray-300"
-              }`}
+            className={`border p-2 w-full ${
+              touched.invoiceType && !form.invoiceType
+                ? "border-red-500"
+                : "border-gray-300"
+            }`}
             value={form.invoiceType}
-            onChange={(e) => setForm({ ...form, invoiceType: e.target.value, invoiceNo: "", invoiceDate: "" })}
-            onBlur={() =>
-              setTouched({ ...touched, invoiceType: true })
+            onChange={(e) =>
+              setForm({
+                ...form,
+                invoiceType: e.target.value,
+                invoiceNo: "",
+                invoiceDate: "",
+              })
             }
+            onBlur={() => setTouched({ ...touched, invoiceType: true })}
           >
             {/* <option value="">Select Type</option> */}
             <option value="I">Invoice</option>
@@ -278,30 +283,33 @@ export default function PurchasesPage() {
             <span className="text-red-500">*</span>
           </label>
           <input
-            className={`border p-2 w-full ${touched.invoiceNo && !form.invoiceNo ? "border-red-500" : "border-gray-300"
-              }`}
+            className={`border p-2 w-full ${
+              touched.invoiceNo && !form.invoiceNo
+                ? "border-red-500"
+                : "border-gray-300"
+            }`}
             value={form.invoiceNo}
             onChange={(e) => setForm({ ...form, invoiceNo: e.target.value })}
-            onBlur={() =>
-              setTouched({ ...touched, invoiceNo: true })
-            }
+            onBlur={() => setTouched({ ...touched, invoiceNo: true })}
           />
         </div>
 
         {/* Invoice Date */}
         <div>
           <label className="text-sm font-medium">
-            {form.invoiceType === "C" ? "Challan Date" : "Invoice Date"}<span className="text-red-500">*</span>
+            {form.invoiceType === "C" ? "Challan Date" : "Invoice Date"}
+            <span className="text-red-500">*</span>
           </label>
           <input
             type="date"
-            className={`border p-2 w-full ${touched.invoiceDate && !form.invoiceDate ? "border-red-500" : "border-gray-300"
-              }`}
+            className={`border p-2 w-full ${
+              touched.invoiceDate && !form.invoiceDate
+                ? "border-red-500"
+                : "border-gray-300"
+            }`}
             value={form.invoiceDate}
             onChange={(e) => setForm({ ...form, invoiceDate: e.target.value })}
-            onBlur={() =>
-              setTouched({ ...touched, invoiceDate: true })
-            }
+            onBlur={() => setTouched({ ...touched, invoiceDate: true })}
           />
         </div>
 
@@ -309,17 +317,16 @@ export default function PurchasesPage() {
         <div>
           <label className="text-sm font-medium">GST (in %)</label>
           <input
-            className={`border p-2 w-full ${touched.gstPercentage && !form.gstPercentage
-              ? "border-red-500"
-              : "border-gray-300"
-              }`}
+            className={`border p-2 w-full ${
+              touched.gstPercentage && !form.gstPercentage
+                ? "border-red-500"
+                : "border-gray-300"
+            }`}
             value={form.gstPercentage}
             onChange={(e) =>
               setForm({ ...form, gstPercentage: e.target.value })
             }
-            onBlur={() =>
-              setTouched({ ...touched, gstPercentage: true })
-            }
+            onBlur={() => setTouched({ ...touched, gstPercentage: true })}
           />
         </div>
       </div>
@@ -327,7 +334,7 @@ export default function PurchasesPage() {
       {/* ✅ Table */}
       <div className="overflow-x-auto border border-gray-300">
         <table className="min-w-full text-sm border-collapse">
-          <thead className="bg-slate-100 ">
+          <thead className="bg-slate-100">
             <tr>
               {[
                 "Item Code",
@@ -339,12 +346,13 @@ export default function PurchasesPage() {
                 "Total DP",
                 "Total Price",
                 "    ",
-              ].map((head) => (
+              ].map((head, index) => (
                 <th
                   key={head}
                   className="border border-gray-300 p-2 text-center font-semibold"
                 >
                   {head}
+                  {index < 5 && <span className="text-red-500 ml-1">*</span>}
                 </th>
               ))}
             </tr>
@@ -356,45 +364,48 @@ export default function PurchasesPage() {
                 {/* Item Code */}
                 <td className="border border-gray-300 p-1">
                   <input
-                    className={`w-full p-1 outline-none text-center ${touched.itemCode && !item.itemCode ? "border border-red-500" : ""
-                      }`}
+                    className={`w-full p-1 outline-none text-center ${
+                      touched.itemCode && !item.itemCode
+                        ? "border border-red-500"
+                        : ""
+                    }`}
                     value={item.itemCode || ""}
                     onChange={(e) =>
                       updateRow(index, "itemCode", e.target.value)
                     }
-                    onBlur={() =>
-                      setTouched({ ...touched, itemCode: true })
-                    }
+                    onBlur={() => setTouched({ ...touched, itemCode: true })}
                   />
                 </td>
 
                 {/* Item Description */}
                 <td className="border border-gray-300 p-1">
                   <input
-                    className={`w-full p-1 outline-none text-left ${touched.itemDesc && !item.itemDesc ? "border border-red-500" : ""
-                      }`}
+                    className={`w-full p-1 outline-none text-left ${
+                      touched.itemDesc && !item.itemDesc
+                        ? "border border-red-500"
+                        : ""
+                    }`}
                     value={item.itemDesc || ""}
                     onChange={(e) =>
                       updateRow(index, "itemDesc", e.target.value)
                     }
-                    onBlur={() =>
-                      setTouched({ ...touched, itemDesc: true })
-                    }
+                    onBlur={() => setTouched({ ...touched, itemDesc: true })}
                   />
                 </td>
 
                 {/* HSN */}
                 <td className="border border-gray-300 p-1">
                   <input
-                    className={`w-full p-1 outline-none text-center ${touched.hsnCode && !item.hsnCode ? "border border-red-500" : ""
-                      }`}
+                    className={`w-full p-1 outline-none text-center ${
+                      touched.hsnCode && !item.hsnCode
+                        ? "border border-red-500"
+                        : ""
+                    }`}
                     value={item.hsnCode || ""}
                     onChange={(e) =>
                       updateRow(index, "hsnCode", e.target.value)
                     }
-                    onBlur={() =>
-                      setTouched({ ...touched, hsnCode: true })
-                    }
+                    onBlur={() => setTouched({ ...touched, hsnCode: true })}
                   />
                 </td>
 
@@ -402,13 +413,14 @@ export default function PurchasesPage() {
                 <td className="border border-gray-300 p-1">
                   <input
                     type="number"
-                    className={`w-full p-1 outline-none text-right ${touched.rateDp && !item.rateDp ? "border border-red-500" : ""
-                      }`}
+                    className={`w-full p-1 outline-none text-right ${
+                      touched.rateDp && !item.rateDp
+                        ? "border border-red-500"
+                        : ""
+                    }`}
                     value={item.rateDp || ""}
                     onChange={(e) => updateRow(index, "rateDp", e.target.value)}
-                    onBlur={() =>
-                      setTouched({ ...touched, rateDp: true })
-                    }
+                    onBlur={() => setTouched({ ...touched, rateDp: true })}
                   />
                 </td>
 
@@ -416,15 +428,16 @@ export default function PurchasesPage() {
                 <td className="border border-gray-300 p-1">
                   <input
                     type="number"
-                    className={`w-full p-1 outline-none text-right ${touched.quantity && !item.quantity ? "border border-red-500" : ""
-                      }`}
+                    className={`w-full p-1 outline-none text-right ${
+                      touched.quantity && !item.quantity
+                        ? "border border-red-500"
+                        : ""
+                    }`}
                     value={item.quantity || ""}
                     onChange={(e) =>
                       updateRow(index, "quantity", e.target.value)
                     }
-                    onBlur={() =>
-                      setTouched({ ...touched, quantity: true })
-                    }
+                    onBlur={() => setTouched({ ...touched, quantity: true })}
                   />
                 </td>
 
@@ -456,9 +469,7 @@ export default function PurchasesPage() {
                 </td>
                 {/*Delete Button*/}
                 <td className="relative border border-gray-300 p-2 pr-0">
-                  <input
-                    className="w-full px-2 py-1 bg-transparent outline-none"
-                  />
+                  <input className="w-full px-2 py-1 bg-transparent outline-none" />
 
                   {/* Delete Icon */}
                   <button
