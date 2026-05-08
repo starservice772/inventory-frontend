@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import comlogo from "../../assets/comlogo3.png";
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
+import loginUser from "../../api/loginApi";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -12,45 +13,54 @@ export default function LoginPage() {
     company: "GODREJ",
   });
 
+  const loginValidate = (form) => {
+    let newErrors = {};
+
+    if (!form.username.trim()) {
+      newErrors.username = true;
+    }
+
+    if (!form.password.trim()) {
+      newErrors.password = true;
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      toast.error("Please fill all required fields");
+      return false;
+    }
+
+    return true;
+  }
+
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!loginValidate(form)) return;
+
     try {
-      const BASE_URL = "https://dev.starserviceinventory.cloud/api";
-      const res = await fetch(`${BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
+      const data = await loginUser(form);
+      // 🔴 BLOCK INACTIVE USER (extra safety)
+      // if (data.status && data.status !== "ACTIVE") {
+      //   toast.error("Your account is deactivated");
+      //   return;
+      // }
 
-      let data = null;
+      const expiryTime = Date.now() + 12 * 60 * 60 * 1000; // 12 hours
 
-      try {
-        data = await res.json();
-      } catch {
-        console.log("Non-JSON response");
-      }
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data));
+      localStorage.setItem("expiry", expiryTime.toString()); // ✅ store expiry
 
-      if (res.ok) {
-        const expiryTime = Date.now() + 12 * 60 * 60 * 1000; // 12 hours
-
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data));
-        localStorage.setItem("expiry", expiryTime.toString()); // ✅ store expiry
-
-        navigate("/dashboard");
-      } else {
-        console.error("Backend error:", data);
-        toast.error(data?.message || "Login failed");
-      }
+      navigate("/dashboard");
 
     } catch (err) {
-      console.error("Network error:", err);
-      toast.error("Cannot connect to backend");
+      console.error(err.message);
+      toast.error(err.message || "Login failed");
     }
   };
 
@@ -107,11 +117,20 @@ export default function LoginPage() {
             <input
               type="text"
               placeholder="Enter your username"
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 
-              focus:border-blue-500 transition duration-200"
+              className={`w-full px-4 py-2 rounded-lg border mt-1
+              focus:outline-none focus:ring-2 transition duration-200
+              ${errors.username
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
               value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, username: e.target.value })
+                setErrors((prev) => ({
+                  ...prev,
+                  username: false,
+                }));
+              }}
             />
           </div>
 
@@ -124,11 +143,20 @@ export default function LoginPage() {
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 
-              focus:border-blue-500 transition duration-200"
+                className={`w-full px-4 py-2 rounded-lg border
+                focus:outline-none focus:ring-2 transition duration-200
+                ${errors.password
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                 value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, password: e.target.value })
+                  setErrors((prev) => ({
+                    ...prev,
+                    password: false,
+                  }));
+                }}
               />
 
               <button

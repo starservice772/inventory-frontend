@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { createUser } from "../api/userService";
+// import { createUser } from "../api/userService";
 import toast from "react-hot-toast";
-import { LogIn } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 const token = localStorage.getItem("token");
 const BASE_URL = "https://dev.starserviceinventory.cloud/api";
@@ -164,7 +164,7 @@ function UserForm({ user, onSuccess }) {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-2 top-2 text-xs text-blue-500"
             >
-              {showPassword ? "Hide" : "Show"}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
         </div>
@@ -202,7 +202,7 @@ function UserForm({ user, onSuccess }) {
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            type="number"
+            
             className={`w-full border p-2 rounded mt-1 
     ${errors.phone ? "border-red-500" : "border-gray-300"}`}
           />
