@@ -4,9 +4,6 @@ const EmployeeModal = ({
   form,
   handleChange,
   handleSubmit,
-  errors = {},
-  showPassword,
-  setShowPassword
 }) => {
   if (!showModal) return null;
 
@@ -51,6 +48,7 @@ const EmployeeModal = ({
               name="phone"
               value={form.phone}
               onChange={handleChange}
+              maxLength={10}
               className="w-full px-4 py-2 rounded-lg border border-gray-300 mt-1"
             />
           </div>

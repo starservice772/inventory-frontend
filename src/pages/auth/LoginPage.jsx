@@ -13,10 +13,34 @@ export default function LoginPage() {
     company: "GODREJ",
   });
 
+  const loginValidate = (form) => {
+    let newErrors = {};
+
+    if (!form.username.trim()) {
+      newErrors.username = true;
+    }
+
+    if (!form.password.trim()) {
+      newErrors.password = true;
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      toast.error("Please fill all required fields");
+      return false;
+    }
+
+    return true;
+  }
+
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!loginValidate(form)) return;
 
     try {
       const data = await loginUser(form);
@@ -93,11 +117,20 @@ export default function LoginPage() {
             <input
               type="text"
               placeholder="Enter your username"
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 
-              focus:border-blue-500 transition duration-200"
+              className={`w-full px-4 py-2 rounded-lg border mt-1
+              focus:outline-none focus:ring-2 transition duration-200
+              ${errors.username
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
               value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, username: e.target.value })
+                setErrors((prev) => ({
+                  ...prev,
+                  username: false,
+                }));
+              }}
             />
           </div>
 
@@ -110,11 +143,20 @@ export default function LoginPage() {
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 
-              focus:border-blue-500 transition duration-200"
+                className={`w-full px-4 py-2 rounded-lg border
+                focus:outline-none focus:ring-2 transition duration-200
+                ${errors.password
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                 value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, password: e.target.value })
+                  setErrors((prev) => ({
+                    ...prev,
+                    password: false,
+                  }));
+                }}
               />
 
               <button

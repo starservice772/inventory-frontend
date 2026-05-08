@@ -1,231 +1,240 @@
 import { useEffect, useState } from "react";
 import {
-  getEmployees,
-  createEmployee,
-  toggleEmployeeStatus,
-  updateEmployee,
-  deleteEmployee,
-  searchEmployees,
+    getEmployees,
+    createEmployee,
+    toggleEmployeeStatus,
+    updateEmployee,
+    deleteEmployee,
+    searchEmployees,
 } from "../../api/employeeApi";
 import EmployeeModal from "../../components/emp/CreateEmployee";
 import ActionMenu from "../../components/emp/EmployeeAction";
 import EditEmployeeModal from "./EditEmployee";
 
+import {addValidateForm,editValidateForm} from "./EmployeeValidate";
+
 import toast from "react-hot-toast";
 
 function EmployeePage() {
-  const [employees, setEmployees] = useState([]);
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [search, setSearch] = useState("");
-  // const [searchValue, setSearchValue] = useState("");
+    const [employees, setEmployees] = useState([]);
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [search, setSearch] = useState("");
+    // const [searchValue, setSearchValue] = useState("");
 
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
 
-  const [openMenuId, setOpenMenuId] = useState(null);
-  // modal useEffect function
-  useEffect(() => {
-    const handleClickOutside = () => setOpenMenuId(null);
-    window.addEventListener("click", handleClickOutside);
+    const [openMenuId, setOpenMenuId] = useState(null);
+    // modal useEffect function
+    useEffect(() => {
+        const handleClickOutside = () => setOpenMenuId(null);
+        window.addEventListener("click", handleClickOutside);
 
-    return () => window.removeEventListener("click", handleClickOutside);
-  }, []);
+        return () => window.removeEventListener("click", handleClickOutside);
+    }, []);
 
-  const [showModal, setShowModal] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
-  const [form, setForm] = useState({
-    id: "",
-    name: "",
-    phone: "",
-    employeeCode: "",
-    gender: "MALE",
-    role: "",
-  });
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleOpenCreateModal = () => {
-    setForm({
-      id: "",
-      name: "",
-      phone: "",
-      employeeCode: "",
-      gender: "MALE",
-      role: "",
-    });
-
-    setSelectedEmployeeId(null); // reset edit mode
-    setShowEditModal(false);
-    setShowModal(true);
-  };
-
-  // getAllEmployees useEffect function
-  // useEffect(() => {
-  //     loadEmployees(page, searchValue);
-  // }, [page, searchValue]);
-
-  // Function to get all employees
-  const loadEmployees = async (page, searchText = "") => {
-    try {
-      let res;
-      if (!searchText || searchText.length < 2) {
-        // 📄 Normal API
-        res = await getEmployees(page);
-      } else {
-        // 🔍 Call SEARCH API
-        res = await searchEmployees(page, searchText);
-      }
-      setEmployees(res.employees || []);
-      setTotalPages(res.totalPages || 0); // ✅ ADD THIS
-    } catch (error) {
-      console.error("Error in component:", error.message);
-      setEmployees([]); // fallback
-      setTotalPages(0);
-    }
-  };
-
-  // search employees useEffect function
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      loadEmployees(page, search);
-    }, 400);
-
-    return () => clearTimeout(delay);
-  }, [search, page]);
-
-  // Function for working of modal submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      await createEmployee(form); // ✅ send actual data
-
-      toast.success("Employee created successfully!!");
-
-      // ✅ close modal
-      setShowModal(false);
-
-      // ✅ refresh list
-      loadEmployees(page);
-
-      // ✅ reset form AFTER success
-      setForm({
+    const [form, setForm] = useState({
         id: "",
         name: "",
         phone: "",
         employeeCode: "",
         gender: "MALE",
         role: "",
-      });
-    } catch (err) {
-      toast.error("Failed to create Employee");
-      console.error(err.message);
-    }
-  };
-
-  // Function for changing employee status
-  const handleToggleStatus = async (emp) => {
-    try {
-      await toggleEmployeeStatus(emp);
-
-      const newStatus = emp.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
-
-      // ✅ Update only clicked employee
-      setEmployees((prev) =>
-        prev.map((e) => (e.id === emp.id ? { ...e, status: newStatus } : e)),
-      );
-
-      // close dropdown
-      setOpenMenuId(null);
-      toast.success(
-        newStatus === "ACTIVE"
-          ? "Employee activated successfully"
-          : "Employee deactivated successfully",
-        {
-          icon: newStatus === "ACTIVE" ? "✅" : "⛔",
-        },
-      );
-    } catch (error) {
-      console.error("Toggle error:", error.message);
-    }
-  };
-
-  // Function for update employee details
-  const handleEdit = (emp) => {
-    setShowEditModal(true);
-    setSelectedEmployeeId(emp.id);
-
-    // prefill form
-    setForm({
-      id: emp.id,
-      name: emp.name,
-      phone: emp.phone,
-      gender: emp.gender,
-      role: emp.role,
     });
-  };
 
-  // Function for update employee details
-  const handleUpdate = async (e) => {
-    e.preventDefault();
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
 
-    try {
-      await updateEmployee(form);
+    const handleOpenCreateModal = () => {
+        setForm({
+            id: "",
+            name: "",
+            phone: "",
+            employeeCode: "",
+            gender: "MALE",
+            role: "",
+        });
 
-      // 🔥 MUST fetch fresh data from backend
-      await loadEmployees(page, search);
-      setShowEditModal(false);
-      toast.success("Employee updated successfully ✅");
-    } catch (error) {
-      console.error(error.message);
-      toast.error("Update failed ❌");
-    }
-  };
+        setSelectedEmployeeId(null); // reset edit mode
+        setShowEditModal(false);
+        setShowModal(true);
+    };
 
-  // Function to delete an employee
-  const handleDelete = (emp) => {
-    toast((t) => (
-      // delete alert pop up modal
-      <div>
-        <p className="font-medium">
-          Are you sure you want to delete <b>{emp.name}</b>?
-        </p>
+    // getAllEmployees useEffect function
+    // useEffect(() => {
+    //     loadEmployees(page, searchValue);
+    // }, [page, searchValue]);
 
-        <div className="flex gap-2 mt-3">
-          {/* YES */}
-          <button
-            onClick={async () => {
-              try {
-                await deleteEmployee(emp.id);
+    // Function to get all employees
+    const loadEmployees = async (page, searchText = "") => {
+        try {
+            let res;
+            if (!searchText || searchText.length < 2) {
+                // 📄 Normal API
+                res = await getEmployees(page);
+            } else {
+                // 🔍 Call SEARCH API
+                res = await searchEmployees(page, searchText);
+            }
+            setEmployees(res.employees || []);
+            setTotalPages(res.totalPages || 0); // ✅ ADD THIS
+        } catch (error) {
+            console.error("Error in component:", error.message);
+            setEmployees([]); // fallback
+            setTotalPages(0);
+        }
+    };
 
-                // ✅ RELOAD WITH SEARCH APPLIED
-                await loadEmployees(page, search);
+    // search employees useEffect function
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            loadEmployees(page, search);
+        }, 400);
 
-                toast.dismiss(t.id);
-                toast.success("Employee deleted successfully 🗑️");
-              } catch (err) {
-                toast.error("Delete failed ❌");
-              }
-            }}
-            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-          >
-            Yes
-          </button>
+        return () => clearTimeout(delay);
+    }, [search, page]);
 
-          {/* NO */}
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            className="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400"
-          >
-            No
-          </button>
-        </div>
-      </div>
-    ));
-  };
+
+    // Function for working of adding employee
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        // 🔥 VALIDATION
+        if (!addValidateForm(form)) return;
+
+        try {
+            await createEmployee(form); // ✅ send actual data
+
+            toast.success("Employee created successfully!!");
+
+            // ✅ close modal
+            setShowModal(false);
+
+            // ✅ refresh list
+            loadEmployees(page);
+
+            // ✅ reset form AFTER success
+            setForm({
+                id: "",
+                name: "",
+                phone: "",
+                employeeCode: "",
+                gender: "MALE",
+                role: "",
+            });
+        } catch (err) {
+            toast.error("Failed to create Employee");
+            console.error(err.message);
+        }
+    };
+
+    // Function for changing employee status
+    const handleToggleStatus = async (emp) => {
+        try {
+            await toggleEmployeeStatus(emp);
+
+            const newStatus = emp.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+
+            // ✅ Update only clicked employee
+            setEmployees((prev) =>
+                prev.map((e) => (e.id === emp.id ? { ...e, status: newStatus } : e)),
+            );
+
+            // close dropdown
+            setOpenMenuId(null);
+            toast.success(
+                newStatus === "ACTIVE"
+                    ? "Employee activated successfully"
+                    : "Employee deactivated successfully",
+                {
+                    icon: newStatus === "ACTIVE" ? "✅" : "⛔",
+                },
+            );
+        } catch (error) {
+            console.error("Toggle error:", error.message);
+        }
+    };
+
+    // Function for update employee details
+    const handleEdit = (emp) => {
+        setShowEditModal(true);
+        setSelectedEmployeeId(emp.id);
+
+        // prefill form
+        setForm({
+            id: emp.id,
+            name: emp.name,
+            phone: emp.phone,
+            gender: emp.gender,
+            role: emp.role,
+        });
+    };
+
+    // Function for update employee details
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+
+        // 🔥 VALIDATION
+        if (!editValidateForm(form)) return;
+
+        try {
+            await updateEmployee(form);
+
+            // 🔥 MUST fetch fresh data from backend
+            await loadEmployees(page, search);
+            setShowEditModal(false);
+            toast.success("Employee updated successfully ✅");
+        } catch (error) {
+            console.error(error.message);
+            toast.error("Update failed ❌");
+        }
+    };
+
+    // Function to delete an employee
+    const handleDelete = (emp) => {
+        toast((t) => (
+            // delete alert pop up modal
+            <div>
+                <p className="font-medium">
+                    Are you sure you want to delete <b>{emp.name}</b>?
+                </p>
+
+                <div className="flex gap-2 mt-3">
+                    {/* YES */}
+                    <button
+                        onClick={async () => {
+                            try {
+                                await deleteEmployee(emp.id);
+
+                                // ✅ RELOAD WITH SEARCH APPLIED
+                                await loadEmployees(page, search);
+
+                                toast.dismiss(t.id);
+                                toast.success("Employee deleted successfully 🗑️");
+                            } catch (err) {
+                                toast.error("Delete failed ❌");
+                            }
+                        }}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                    >
+                        Yes
+                    </button>
+
+                    {/* NO */}
+                    <button
+                        onClick={() => toast.dismiss(t.id)}
+                        className="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400"
+                    >
+                        No
+                    </button>
+                </div>
+            </div>
+        ));
+    };
 
     return (
         <div className="bg-white rounded-2xl shadow-md border border-gray-300">
