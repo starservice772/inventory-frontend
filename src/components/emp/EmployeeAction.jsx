@@ -26,7 +26,14 @@ const ActionMenu = ({ emp,
   }, []);
 
   return (
+<<<<<<< HEAD
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="absolute right-2 top-full mt-2 w-40 bg-white border rounded-xl shadow-lg z-50"
+    >
+=======
     <div ref={dropdownRef} className="relative">
+>>>>>>> 7cb329acc7f827033c17b481556162119887727f
       <button
         onClick={() => setOpen((prev) => !prev)}
         className="p-2 hover:bg-slate-100 rounded"

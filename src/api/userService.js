@@ -18,6 +18,36 @@ export const createUser = async (userData) => {
   return response.json();
 };
 
+
+export const getUserById = async (id) => {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+        `${BASE_URL}/users/getById?id=${id}`,
+        {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    let data = null;
+
+    try {
+        data = await res.json();
+    } catch {
+        console.log("Non-JSON response");
+    }
+
+    if (!res.ok) {
+        throw new Error(data?.message || "Failed to fetch user");
+    }
+
+    // Return employee object
+    return data?.response || data;
+};
 // export const deactivateUser = async (id) => {
 //   const token = localStorage.getItem("token");
 
@@ -59,12 +89,11 @@ export const changeUserStatus = async (id) => {
   return await response.json(); // if backend returns JSON
 };
 
-// ✅ GET USERS
-export const getUsers = async (page = 0, size = 10, search="") => {
+// ✅ GET USERS — clean fetch, no search (used on load & refresh)
+export const getUsers = async (page = 0, size = 10) => {
   const token = localStorage.getItem("token");
-  // console.log("TOKEN:", token); // 🔍 check this
 
-  const res = await fetch(`${BASE_URL}/users/getAll/${page}/${size}?search=${encodeURIComponent(search)}`, {
+  const res = await fetch(`${BASE_URL}/users/getAll/${page}/${size}`, {
     method: "GET",
     headers: {
       ...(token && { Authorization: `Bearer ${token}` }),
@@ -79,6 +108,33 @@ export const getUsers = async (page = 0, size = 10, search="") => {
 
   return data;
 };
+
+// 🔍 SEARCH USERS — separate API, only fired when user types in search bar
+export const searchUsers = async (page = 0, search = "") => {
+  const token = localStorage.getItem("token");
+
+  const url = `${BASE_URL}/users/getAll/${page}/10?search=${encodeURIComponent(search)}`;
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to search users");
+  }
+
+  return {
+    users: data?.response || [],
+    totalPages: data?.totalPages || 0,
+    totalRecords: data?.totalRecords || 0,
+  };
+};
+
 
 // ✅ UPDATE USER
 export const updateUser = async (data) => {
