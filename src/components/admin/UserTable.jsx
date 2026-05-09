@@ -186,7 +186,7 @@ export default function UserTable() {
           <tr>
             <th className="p-4 text-left">UserID</th>
             <th className="p-4 text-left">Name</th>
-            <th className="p-4 text-left">Role</th>
+            <th className="p-4 text-left">Designation</th>
             <th className="p-4 text-left">Username</th>
             <th className="p-4 text-left">Email</th>
             <th className="p-4 text-left">Phone</th>
