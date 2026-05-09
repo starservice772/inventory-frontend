@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react";
 
 const BASE_URL = "https://dev.starserviceinventory.cloud/api";
 
@@ -209,7 +210,7 @@ function UserForm({ user, onSuccess }) {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-blue-500 font-medium"
             >
-              {showPassword ? "Hide" : "Show"}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
           {errors.password && (

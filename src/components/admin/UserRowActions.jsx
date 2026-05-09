@@ -29,7 +29,7 @@ export default function UserRowActions({ user, onEdit, onDeactivate, onToggleSta
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 bg-white border rounded-xl shadow-lg w-40 z-50">
+        <div className="absolute right-0 mt-2 bg-white border shadow-lg w-40 z-50">
           <button
             onClick={() => {
               if (user.status !== "ACTIVE") return;

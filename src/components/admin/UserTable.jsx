@@ -176,7 +176,7 @@ export default function UserTable() {
           }}
           className="bg-orange-500 text-white px-5 py-2 rounded-lg"
         >
-          + New User
+          New User
         </button>
       </div>
 

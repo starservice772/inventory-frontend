@@ -1,51 +1,73 @@
-const ActionMenu = ({
-  emp,
+import { MoreHorizontal } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+
+const ActionMenu = ({ emp,
   openMenuId,
   setOpenMenuId,
   handleEdit,
   handleDelete,
-  handleToggleStatus,
+  handleToggleStatus
 }) => {
-  if (openMenuId !== emp.id) return null;
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
+<<<<<<< HEAD
     <div
       onClick={(e) => e.stopPropagation()}
       className="absolute right-2 top-full mt-2 w-40 bg-white border rounded-xl shadow-lg z-50"
     >
+=======
+    <div ref={dropdownRef} className="relative">
+>>>>>>> 7cb329acc7f827033c17b481556162119887727f
       <button
-        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-        onClick={() =>{ 
-            handleEdit(emp);
-            setOpenMenuId(null);
-        }}
+        onClick={() => setOpen((prev) => !prev)}
+        className="p-2 hover:bg-slate-100 rounded"
       >
-        Edit
+        <MoreHorizontal size={18} />
       </button>
 
-      <button
-        className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500"
-        onClick={() => {
-            handleDelete(emp);
-            setOpenMenuId(null);
-        }}
-      >
-        Delete
-      </button>
+      {open && (
+        <div className="absolute right-0 mt-2 bg-white border shadow-lg w-40 z-50">
+          <button
+            onClick={() => {
+              handleEdit(emp);
+              setOpenMenuId(false);
+            }}
+            className="w-full text-left px-4 py-2 hover:bg-slate-50"
+          >
+            Edit
+          </button>
 
-      <button
-        className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${
-          emp.status === "ACTIVE" ? "text-red-500" : "text-green-600"
-        }`}
-        onClick={() => {
-            handleToggleStatus(emp);
-            setOpenMenuId(null);
-        }}
-      >
-        {emp.status === "ACTIVE" ? "Deactivate" : "Activate"}
-      </button>
+          <button
+            className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${emp.status === "ACTIVE" ? "text-red-500" : "text-green-600"
+              }`}
+            onClick={() => {
+              handleToggleStatus(emp);
+              setOpen(false);
+            }}
+          >
+            {emp.status === "ACTIVE" ? "Deactivate" : "Activate"}
+          </button>
+        </div>
+
+      )}
     </div>
-  );
-};
+  )
+}
 
 export default ActionMenu;
