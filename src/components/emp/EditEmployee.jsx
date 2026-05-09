@@ -78,6 +78,28 @@ const EditEmployeeModal = ({
 
                     </div>
 
+                    {/* Created Date */}
+                    <div>
+                        <label className="text-sm text-gray-700">Created Date</label>
+                        <input
+                            type="text"
+                            value={form.createdDate || ""}
+                            readOnly
+                            className="w-full px-4 py-2 rounded-lg border border-gray-300 mt-1 bg-gray-100 text-gray-600 cursor-not-allowed"
+                        />
+                    </div>
+
+                    {/* Updated Date */}
+                    <div>
+                        <label className="text-sm text-gray-700">Updated Date</label>
+                        <input
+                            type="text"
+                            value={form.updatedDate || ""}
+                            readOnly
+                            className="w-full px-4 py-2 rounded-lg border border-gray-300 mt-1 bg-gray-100 text-gray-600 cursor-not-allowed"
+                        />
+                    </div>
+
                     {/* SUBMIT BUTTON */}
                     <button
                         type="submit"
