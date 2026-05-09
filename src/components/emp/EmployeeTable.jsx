@@ -6,12 +6,13 @@ import {
     updateEmployee,
     deleteEmployee,
     searchEmployees,
+    getEmployeeById
 } from "../../api/employeeApi";
 import EmployeeModal from "../../components/emp/CreateEmployee";
 import ActionMenu from "../../components/emp/EmployeeAction";
 import EditEmployeeModal from "./EditEmployee";
 
-import {addValidateForm,editValidateForm} from "./EmployeeValidate";
+import { addValidateForm, editValidateForm } from "./EmployeeValidate";
 
 import toast from "react-hot-toast";
 
@@ -43,6 +44,8 @@ function EmployeePage() {
         employeeCode: "",
         gender: "MALE",
         role: "",
+        createdDate: "",
+        updatedDate: "",
     });
 
     const handleChange = (e) => {
@@ -144,6 +147,16 @@ function EmployeePage() {
                 prev.map((e) => (e.id === emp.id ? { ...e, status: newStatus } : e)),
             );
 
+            // 🔥 If the currently edited employee becomes inactive,
+            // close the edit modal automatically
+            if (
+                selectedEmployeeId === emp.id &&
+                newStatus === "INACTIVE"
+            ) {
+                setShowEditModal(false);
+                toast.error("Inactive employees cannot be edited");
+            }
+
             // close dropdown
             setOpenMenuId(null);
             toast.success(
@@ -160,40 +173,99 @@ function EmployeePage() {
     };
 
     // Function for update employee details
-    const handleEdit = (emp) => {
-        setShowEditModal(true);
-        setSelectedEmployeeId(emp.id);
-
-        // prefill form
-        setForm({
-            id: emp.id,
-            name: emp.name,
-            phone: emp.phone,
-            gender: emp.gender,
-            role: emp.role,
-        });
-    };
-
-    // Function for update employee details
-    const handleUpdate = async (e) => {
-        e.preventDefault();
-
-        // 🔥 VALIDATION
-        if (!editValidateForm(form)) return;
-
+    const handleEdit = async (emp) => {
         try {
-            await updateEmployee(form);
+            // 🔥 Call GET BY ID API
+            const response = await getEmployeeById(emp.id);
 
-            // 🔥 MUST fetch fresh data from backend
-            await loadEmployees(page, search);
-            setShowEditModal(false);
-            toast.success("Employee updated successfully ✅");
-        } catch (error) {
+            // 🔥 Debug
+            // console.log("Employee fetched for edit:", response);
+
+            const employee = response.data;
+
+            // Store selected employee id
+            setSelectedEmployeeId(emp.id);
+
+            // Prefill edit form
+            setForm({
+                id: employee.id,
+                name: employee.name || "",
+                phone: employee.phone || "",
+                // employeeCode: employee.employeeCode || "",
+                gender: employee.gender || "MALE",
+                role: employee.role || "",
+                createdDate: employee.createdDate || "",
+                updatedDate: employee.updatedDate || "",
+            });
+
+            // Open edit modal
+            setShowEditModal(true);
+        }
+        catch (error) {
             console.error(error.message);
-            toast.error("Update failed ❌");
+            toast.error("Failed to load employee details");
         }
     };
 
+    // Separate function for Edit button click
+    const handleEditClick = async (emp) => {
+        setOpenMenuId(null);
+        
+        if (emp.status !== "ACTIVE") {
+            toast.error("Inactive employees cannot be edited");
+            return;
+        }
+
+        await handleEdit(emp);
+    };
+
+    // Function for updating employee
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+
+        // 🔥 Validation
+        if (!editValidateForm(form)) return;
+
+        try {
+            // 🔥 Send only editable fields (avoid sending createdDate/updatedDate)
+            const payload = {
+                id: form.id,
+                name: form.name,
+                phone: form.phone,
+                // employeeCode: form.employeeCode,
+                gender: form.gender,
+                role: form.role,
+            };
+
+            console.log("Updating employee with payload:", payload);
+
+            // Call update API
+            await updateEmployee(payload);
+
+            // Refresh table data
+            await loadEmployees(page, search);
+
+            // Close modal
+            setShowEditModal(false);
+
+            // Reset form
+            setForm({
+                id: "",
+                name: "",
+                phone: "",
+                employeeCode: "",
+                gender: "MALE",
+                role: "",
+                createdDate: "",
+                updatedDate: "",
+            });
+
+            toast.success("Employee updated successfully ✅");
+        } catch (error) {
+            console.error("Update failed:", error);
+            toast.error(error.message || "Update failed ❌");
+        }
+    };
     // Function to delete an employee
     const handleDelete = (emp) => {
         toast((t) => (
@@ -315,7 +387,7 @@ function EmployeePage() {
                                     emp={emp}
                                     openMenuId={openMenuId}
                                     setOpenMenuId={setOpenMenuId}
-                                    handleEdit={handleEdit}
+                                    handleEdit={handleEditClick}
                                     handleDelete={handleDelete}
                                     handleToggleStatus={handleToggleStatus}
                                 />
