@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import UserForm from "../UserForm"; // adjust path if needed
 import EditUserForm from "../EditUserForm";
 
-import { getUsers, changeUserStatus, updateUser } from "../../api/userService";
+import { getUsers, searchUsers, changeUserStatus, updateUser, getUserById } from "../../api/userService";
 
 import SearchBar from "./SearchBar";
 import Pagination from "./Pagination";
@@ -27,10 +27,10 @@ export default function UserTable() {
 
   // const paginatedUsers = filtered.slice(page * pageSize, (page + 1) * pageSize);
 
+  // 🔄 Normal load & refresh — calls getUsers (no search param)
   const fetchAllUsers = async () => {
     try {
-      const data = await getUsers(page, 10, search);
-
+      const data = await getUsers(page, 10);
       setUsers(data.response || []);
       setTotalPages(data.totalPages || 1);
     } catch {
@@ -39,10 +39,28 @@ export default function UserTable() {
     }
   };
 
+  // 🔍 Search — calls searchUsers (only when search is active)
+  const fetchSearchResults = async () => {
+    try {
+      const data = await searchUsers(page, search);
+      setUsers(data.users);
+      setTotalPages(data.totalPages);
+    } catch {
+      toast.error("Failed to search users");
+      setUsers([]);
+    }
+  };
+
+  // Branch: use search API only when search is active, otherwise normal fetch
   useEffect(() => {
-    fetchAllUsers();
+    if (search.trim().length >= 3) {
+      fetchSearchResults(); // 🔍 search API fires
+    } else {
+      fetchAllUsers();      // 🔄 normal load fires
+    }
   }, [page, search]);
 
+  // Reset to page 0 whenever search changes
   useEffect(() => {
     setPage(0);
   }, [search]);
@@ -204,10 +222,15 @@ export default function UserTable() {
               <td>
                 <UserRowActions
                   user={user}
-                  onEdit={(u) => {
-                    setMode("edit");
-                    setSelectedUser(u);
-                    setShowForm(true);
+                  onEdit={async (u) => {
+                    try {
+                      const fullUser = await getUserById(u.uuid);
+                      setMode("edit");
+                      setSelectedUser(fullUser);
+                      setShowForm(true);
+                    } catch {
+                      toast.error("Failed to load user details ❌");
+                    }
                   }}
                   onToggleStatus={handleToggleStatus}
                 />
