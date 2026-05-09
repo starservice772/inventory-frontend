@@ -32,10 +32,17 @@ export default function UserRowActions({ user, onEdit, onDeactivate, onToggleSta
         <div className="absolute right-0 mt-2 bg-white border shadow-lg w-40 z-50">
           <button
             onClick={() => {
+              if (user.status !== "ACTIVE") return;
               onEdit(user);
               setOpen(false);
             }}
-            className="w-full text-left px-4 py-2 hover:bg-slate-50"
+            disabled={user.status !== "ACTIVE"}
+            title={user.status !== "ACTIVE" ? "Cannot edit an inactive user" : ""}
+            className={`w-full text-left px-4 py-2 transition ${
+              user.status !== "ACTIVE"
+                ? "text-gray-400 cursor-not-allowed bg-gray-50"
+                : "hover:bg-slate-50 text-gray-700"
+            }`}
           >
             Edit
           </button>

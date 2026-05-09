@@ -3,6 +3,29 @@ import toast from "react-hot-toast";
 
 const BASE_URL = "https://dev.starserviceinventory.cloud/api";
 
+// ✅ Defined OUTSIDE — stable component reference, no remount on keystroke
+function Field({ label, name, type = "text", formData, errors, onChange }) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-600 mb-1">{label}</label>
+      <input
+        name={name}
+        type={type}
+        value={formData[name]}
+        onChange={onChange}
+        className={`w-full border px-3 py-2 rounded-lg text-sm outline-none transition focus:ring-2 ${
+          errors[name]
+            ? "border-red-400 focus:ring-red-200 bg-red-50"
+            : "border-gray-300 focus:ring-blue-200"
+        }`}
+      />
+      {errors[name] && (
+        <p className="text-red-500 text-xs mt-1">⚠ {errors[name]}</p>
+      )}
+    </div>
+  );
+}
+
 function EditUserForm({ user, onSuccess }) {
   const [formData, setFormData] = useState({
     name: "",
@@ -11,6 +34,7 @@ function EditUserForm({ user, onSuccess }) {
   });
 
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (user) {
@@ -19,19 +43,58 @@ function EditUserForm({ user, onSuccess }) {
         email: user.email || "",
         phone: user.phone || "",
       });
+      setErrors({});
     }
   }, [user]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const validate = () => {
+    const errs = {};
+
+    // ── Name ───────────────────────────────────────────────────────
+    if (!formData.name.trim()) {
+      errs.name = "Full name is required.";
+    } else if (!/^[a-zA-Z\s]+$/.test(formData.name.trim())) {
+      errs.name = "Name must contain letters only (no numbers or symbols).";
+    } else if (formData.name.trim().length < 2) {
+      errs.name = "Name must be at least 2 characters.";
+    }
+
+    // ── Email ──────────────────────────────────────────────────────
+    if (!formData.email.trim()) {
+      errs.email = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      errs.email = "Enter a valid email address (e.g. user@example.com).";
+    }
+
+    // ── Phone ──────────────────────────────────────────────────────
+    if (!formData.phone.trim()) {
+      errs.phone = "Phone number is required.";
+    } else if (!/^\d{10}$/.test(formData.phone.trim())) {
+      errs.phone = "Phone number must be exactly 10 digits.";
+    }
+
+    return errs;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({});
+
     try {
       setLoading(true);
-
       const token = localStorage.getItem("token");
 
       const res = await fetch(`${BASE_URL}/users/update`, {
@@ -57,47 +120,32 @@ function EditUserForm({ user, onSuccess }) {
     }
   };
 
-  if (!user) return null; // 🔐 safety
+  if (!user) return null;
+
+  const fieldProps = { formData, errors, onChange: handleChange };
 
   return (
     <div className="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-md border">
-      <h2 className="text-xl font-semibold mb-4">Edit User</h2>
-    <form
-      onSubmit={handleSubmit}
-      className="grid grid-cols-1 md:grid-cols-2 gap-4"
-    >
-      <div>
-        <label className="text-sm text-gray-600">Name</label>
-        <input
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
+      <h2 className="text-xl font-semibold mb-5 text-gray-800">Edit User</h2>
 
-      {/* Email */}
-      <div>
-        <label className="text-sm text-gray-600">Email</label>
-        <input
-          name="email" value={formData.email} onChange={handleChange}
-          className="w-full border p-2 rounded mt-1"
-        />
-      </div>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4" noValidate>
 
-      {/* Phone */}
-        <div>
-          <label className="text-sm text-gray-600">Phone</label>
-          <input
-            name="phone" value={formData.phone} onChange={handleChange}
-            className="w-full border p-2 rounded mt-1"
-          />
+        <Field label="Full Name"     name="name"  {...fieldProps} />
+        <Field label="Email Address" name="email" type="email" {...fieldProps} />
+
+        {/* Phone — full width */}
+        <div className="md:col-span-2">
+          <Field label="Phone Number" name="phone" type="tel" {...fieldProps} />
         </div>
 
-      <button disabled={loading} className="md:col-span-2 bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
-        {loading ? "Saving..." : "Save Changes"}
-      </button>
-    </form>
+        <button
+          type="submit"
+          disabled={loading}
+          className="md:col-span-2 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 font-medium text-sm"
+        >
+          {loading ? "Saving..." : "Save Changes"}
+        </button>
+      </form>
     </div>
   );
 }

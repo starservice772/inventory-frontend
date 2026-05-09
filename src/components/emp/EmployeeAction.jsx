@@ -25,12 +25,27 @@ const ActionMenu = ({ emp,
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div ref={dropdownRef} className="relative">
       <button
         onClick={() => setOpen((prev) => !prev)}
         className="p-2 hover:bg-slate-100 rounded"
       >
+        <MoreHorizontal size={18} />
         <MoreHorizontal size={18} />
       </button>
 
@@ -45,7 +60,6 @@ const ActionMenu = ({ emp,
           >
             Edit
           </button>
-
           <button
             className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${emp.status === "ACTIVE" ? "text-red-500" : "text-green-600"
               }`}
