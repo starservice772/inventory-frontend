@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-<<<<<<< HEAD
 // import { createUser } from "../api/userService";
-=======
->>>>>>> 0cef0b7b099cff8bca1cd6ad897aa2686233eae2
+
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -222,7 +220,6 @@ function UserForm({ user, onSuccess }) {
           )}
         </div>
 
-<<<<<<< HEAD
         {/* Phone */}
         <div>
           <label className="text-sm text-gray-600">Phone</label>
@@ -256,9 +253,6 @@ function UserForm({ user, onSuccess }) {
         </div>
 
         {/* Role */}
-=======
-        {/* Role — full width */}
->>>>>>> 0cef0b7b099cff8bca1cd6ad897aa2686233eae2
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-600 mb-1">Role</label>
           <select

@@ -46,7 +46,6 @@ const ActionMenu = ({ emp,
         className="p-2 hover:bg-slate-100 rounded"
       >
         <MoreHorizontal size={18} />
-        <MoreHorizontal size={18} />
       </button>
 
       {open && (
