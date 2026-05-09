@@ -154,7 +154,7 @@ function EmployeePage() {
                 newStatus === "INACTIVE"
             ) {
                 setShowEditModal(false);
-                toast.error("Inactive employees cannot be edited");
+                
             }
 
             // close dropdown

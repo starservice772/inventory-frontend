@@ -48,6 +48,7 @@ const ActionMenu = ({ emp,
         <MoreHorizontal size={18} />
       </button>
 
+      {/* Dropdown Menu */}
       {open && (
         <div className="absolute right-0 mt-2 bg-white border shadow-lg w-40 z-50">
           <button
