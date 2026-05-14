@@ -1,12 +1,13 @@
 import { MoreHorizontal } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
-const ActionMenu = ({ emp,
+const ActionMenu = ({
+  emp,
   openMenuId,
   setOpenMenuId,
   handleEdit,
   handleDelete,
-  handleToggleStatus
+  handleToggleStatus,
 }) => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -26,14 +27,7 @@ const ActionMenu = ({ emp,
   }, []);
 
   return (
-<<<<<<< HEAD
-    <div
-      onClick={(e) => e.stopPropagation()}
-      className="absolute right-2 top-full mt-2 w-40 bg-white border rounded-xl shadow-lg z-50"
-    >
-=======
     <div ref={dropdownRef} className="relative">
->>>>>>> 7cb329acc7f827033c17b481556162119887727f
       <button
         onClick={() => setOpen((prev) => !prev)}
         className="p-2 hover:bg-slate-100 rounded"
@@ -54,8 +48,9 @@ const ActionMenu = ({ emp,
           </button>
 
           <button
-            className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${emp.status === "ACTIVE" ? "text-red-500" : "text-green-600"
-              }`}
+            className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${
+              emp.status === "ACTIVE" ? "text-red-500" : "text-green-600"
+            }`}
             onClick={() => {
               handleToggleStatus(emp);
               setOpen(false);
@@ -64,10 +59,9 @@ const ActionMenu = ({ emp,
             {emp.status === "ACTIVE" ? "Deactivate" : "Activate"}
           </button>
         </div>
-
       )}
     </div>
-  )
-}
+  );
+};
 
 export default ActionMenu;
