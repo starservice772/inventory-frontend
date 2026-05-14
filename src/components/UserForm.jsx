@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+// import { createUser } from "../api/userService";
+
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -215,6 +217,22 @@ function UserForm({ user, onSuccess }) {
           </div>
           {errors.password && (
             <p className="text-red-500 text-xs mt-1">⚠ {errors.password}</p>
+          )}
+        </div>
+
+        {/* Phone */}
+        <div>
+          <label className="text-sm text-gray-600">Phone</label>
+          <input
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            
+            className={`w-full border p-2 rounded mt-1 
+    ${errors.phone ? "border-red-500" : "border-gray-300"}`}
+          />
+          {errors.phone && (
+            <p className="text-red-500 text-xs">{errors.phone}</p>
           )}
         </div>
 

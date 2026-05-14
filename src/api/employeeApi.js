@@ -67,6 +67,37 @@ export const createEmployee = async (payload) => {
     return data;
 };
 
+// Get Employee by ID
+export const getEmployeeById = async (id) => {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+        `${BASE_URL}/employee/getById?id=${id}`,
+        {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    let data = null;
+
+    try {
+        data = await res.json();
+    } catch {
+        console.log("Non-JSON response");
+    }
+
+    if (!res.ok) {
+        throw new Error(data?.message || "Failed to fetch employee");
+    }
+
+    // Return employee object
+    return data?.response || data;
+};
+
 
 // TOGGLE EMPLOYEE STATUS
 export const toggleEmployeeStatus = async (emp) => {
