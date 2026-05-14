@@ -1,12 +1,13 @@
 import { MoreHorizontal } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
-const ActionMenu = ({ emp,
+const ActionMenu = ({
+  emp,
   openMenuId,
   setOpenMenuId,
   handleEdit,
   handleDelete,
-  handleToggleStatus
+  handleToggleStatus,
 }) => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -61,8 +62,9 @@ const ActionMenu = ({ emp,
             Edit
           </button>
           <button
-            className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${emp.status === "ACTIVE" ? "text-red-500" : "text-green-600"
-              }`}
+            className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${
+              emp.status === "ACTIVE" ? "text-red-500" : "text-green-600"
+            }`}
             onClick={() => {
               handleToggleStatus(emp);
               setOpen(false);
@@ -71,10 +73,9 @@ const ActionMenu = ({ emp,
             {emp.status === "ACTIVE" ? "Deactivate" : "Activate"}
           </button>
         </div>
-
       )}
     </div>
-  )
-}
+  );
+};
 
 export default ActionMenu;

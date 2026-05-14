@@ -17,27 +17,97 @@ import { addValidateForm, editValidateForm } from "./EmployeeValidate";
 import toast from "react-hot-toast";
 
 function EmployeePage() {
-    const [employees, setEmployees] = useState([]);
-    const [page, setPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
-    const [search, setSearch] = useState("");
-    // const [searchValue, setSearchValue] = useState("");
+  const [employees, setEmployees] = useState([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [search, setSearch] = useState("");
 
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
 
-    const [openMenuId, setOpenMenuId] = useState(null);
-    // modal useEffect function
-    useEffect(() => {
-        const handleClickOutside = () => setOpenMenuId(null);
-        window.addEventListener("click", handleClickOutside);
+  const [openMenuId, setOpenMenuId] = useState(null);
 
-        return () => window.removeEventListener("click", handleClickOutside);
-    }, []);
+  // modal useEffect function
+  useEffect(() => {
+    const handleClickOutside = () => setOpenMenuId(null);
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
 
-    const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-    const [form, setForm] = useState({
+  const [form, setForm] = useState({
+    id: "",
+    name: "",
+    phone: "",
+    employeeCode: "",
+    gender: "MALE",
+    role: "",
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleOpenCreateModal = () => {
+    setForm({
+      id: "",
+      name: "",
+      phone: "",
+      employeeCode: "",
+      gender: "MALE",
+      role: "",
+    });
+    setSelectedEmployeeId(null);
+    setShowEditModal(false);
+    setShowModal(true);
+  };
+
+  // Function to get all employees
+  const loadEmployees = async (page, searchText = "") => {
+    try {
+      let res;
+      if (!searchText || searchText.length < 2) {
+        // 📄 Normal API
+        res = await getEmployees(page);
+      } else {
+        // 🔍 Call SEARCH API
+        res = await searchEmployees(page, searchText);
+      }
+      setEmployees(res.employees || []);
+      setTotalPages(res.totalPages || 0);
+    } catch (error) {
+      console.error("Error in component:", error.message);
+      setEmployees([]);
+      setTotalPages(0);
+    }
+  };
+
+  // search employees useEffect function
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      loadEmployees(page, search);
+    }, 400);
+    return () => clearTimeout(delay);
+  }, [search, page]);
+
+  // Function for working of adding employee
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // 🔥 VALIDATION
+    if (!addValidateForm(form)) return;
+
+    try {
+      await createEmployee(form);
+
+      toast.success("Employee created successfully!!");
+
+      setShowModal(false);
+
+      loadEmployees(page);
+
+      setForm({
         id: "",
         name: "",
         phone: "",
@@ -427,28 +497,75 @@ function EmployeePage() {
                         hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed 
                         transition"
                 >
-                    Prev
-                </button>
-
-                {/* Page Info */}
-                <span className="px-4 py-2 text-sm font-medium text-gray-700">
-                    Page {page + 1} / {totalPages || 1}
+                  {emp.status}
                 </span>
+              </td>
+              {/* Employee Actions */}
+              <td>
+                {/* Employee Action Modal */}
+                <ActionMenu
+                  emp={emp}
+                  openMenuId={openMenuId}
+                  setOpenMenuId={setOpenMenuId}
+                  handleEdit={handleEdit}
+                  handleDelete={handleDelete}
+                  handleToggleStatus={handleToggleStatus}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
-                <button
-                    disabled={page + 1 >= totalPages}
-                    onClick={() => setPage((p) => p + 1)}
-                    className="px-4 py-2 border rounded-lg bg-gray-100 
-                        hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed 
-                        transition"
-                >
-                    Next
-                </button>
+      {/* Employee Update Modal */}
+      <EditEmployeeModal
+        showModal={showEditModal}
+        setShowModal={setShowEditModal}
+        form={form}
+        handleChange={handleChange}
+        handleUpdate={handleUpdate}
+      />
 
-            </div>
-        </div>
+      {/* Create Employee Modal */}
+      <EmployeeModal
+        key={form.id || "create"}
+        showModal={showModal}
+        setShowModal={setShowModal}
+        form={form}
+        handleChange={handleChange}
+        handleSubmit={handleSubmit}
+        onClose={() => setShowModal(false)}
+      />
 
-    );
-};
+      {/* Pagination */}
+      <div className="flex justify-end gap-3 p-4 border-t">
+        <button
+          disabled={page === 0}
+          onClick={() => setPage((p) => Math.max(p - 1, 0))}
+          className="px-4 py-2 border rounded-lg bg-gray-100 
+            hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed 
+            transition"
+        >
+          Prev
+        </button>
+
+        {/* Page Info */}
+        <span className="px-4 py-2 text-sm font-medium text-gray-700">
+          Page {page + 1} / {totalPages || 1}
+        </span>
+
+        <button
+          disabled={page + 1 >= totalPages}
+          onClick={() => setPage((p) => p + 1)}
+          className="px-4 py-2 border rounded-lg bg-gray-100 
+            hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed 
+            transition"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default EmployeePage;
