@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { savePurchase } from "../../api/purchaseApi";
+import { createPortal } from "react-dom";
+import { savePurchase, searchItemByCode } from "../../api/purchaseApi";
 import toast from "react-hot-toast";
 import deleteIcon from "../../assets/delete_Icon.png";
+import { Search } from "lucide-react";
 
 export default function PurchasesPage() {
   // ✅ Separate form state (header)
@@ -42,6 +44,11 @@ export default function PurchasesPage() {
       totalPrice: "",
     },
   ]);
+
+  // 🔍 Per-row item search state
+  const [itemSearchResults, setItemSearchResults] = useState({}); // { rowIndex: [items] }
+  const [itemSearchLoading, setItemSearchLoading] = useState({}); // { rowIndex: bool }
+  const [dropdownPos, setDropdownPos] = useState(null); // { index, top, left } for portal
 
   // ✅ Add new row
   const addRow = () => {
@@ -106,6 +113,66 @@ export default function PurchasesPage() {
     const updated = items.filter((_, i) => i !== index);
     setItems(updated);
   };
+
+  // 🔍 Search item description by item code
+  const handleItemCodeSearch = async (index, e) => {
+    const itemCode = items[index].itemCode?.trim();
+    if (!itemCode) {
+      toast.error("Please enter an item code first");
+      return;
+    }
+
+    // Anchor to the <td> cell so dropdown sits directly below the Item Code input
+    const td = e.currentTarget.closest("td");
+    const rect = (td || e.currentTarget).getBoundingClientRect();
+    setDropdownPos(null); // reset first
+
+    setItemSearchLoading((prev) => ({ ...prev, [index]: true }));
+    setItemSearchResults((prev) => ({ ...prev, [index]: [] }));
+
+    try {
+      const results = await searchItemByCode(itemCode);
+
+      if (!results || results.length === 0) {
+        toast.error("No items found for this code");
+        return;
+      }
+
+      if (results.length === 1) {
+        updateRow(index, "itemDesc", results[0].itemDescription || "");
+        toast.success("Item description filled!");
+      } else {
+        // Multiple → show portal dropdown below the search button
+        setDropdownPos({
+          index,
+          top: rect.bottom + window.scrollY + 8,
+          left: rect.left + window.scrollX,
+          width: rect.width,
+        });
+        setItemSearchResults((prev) => ({ ...prev, [index]: results }));
+      }
+    } catch (err) {
+      console.error("🔴 Search error:", err);
+      toast.error("Failed to fetch item details");
+    } finally {
+      setItemSearchLoading((prev) => ({ ...prev, [index]: false }));
+    }
+  };
+
+  // ✅ User picks one from dropdown → fill both itemCode and itemDesc
+  const selectItemFromSearch = (index, result) => {
+    const updated = [...items];
+    updated[index] = {
+      ...updated[index],
+      itemCode: result.itemCode || updated[index].itemCode,
+      itemDesc:
+        result.itemDescription || result.description || result.name || "",
+    };
+    setItems(updated);
+    setItemSearchResults((prev) => ({ ...prev, [index]: [] }));
+    setDropdownPos(null);
+  };
+
   // ✅ Save API call
   const handleSave = async () => {
     // 🔴 Mark ALL required fields as touched
@@ -213,300 +280,442 @@ export default function PurchasesPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Purchases</h2>
-        <p className="text-slate-500">
-          Add purchase invoice and update office stock
-        </p>
-      </div>
-
-      {/* ✅ Header Inputs */}
-      <div className="grid grid-cols-6 gap-3 items-end">
-        {/* Company */}
+    <>
+      <div className="space-y-6">
         <div>
-          <label className="text-sm font-medium">
-            Company<span className="text-red-500">*</span>
-          </label>
-          <input
-            className={`border p-2 w-full ${
-              touched.companyName && !form.companyName
-                ? "border-red-500"
-                : "border-gray-300"
-            }`}
-            value={form.companyName}
-            onChange={(e) => setForm({ ...form, companyName: e.target.value })}
-            onBlur={() => setTouched({ ...touched, companyName: true })}
-          />
+          <h2 className="text-2xl font-bold">Purchases</h2>
+          <p className="text-slate-500">
+            Add purchase invoice and update office stock
+          </p>
         </div>
 
-        {/* GST No */}
-        <div>
-          <label className="text-sm font-medium">GST No</label>
-          <input
-            className="border border-gray-300 p-2 w-full"
-            value={form.gstNo}
-            onChange={(e) => setForm({ ...form, gstNo: e.target.value })}
-          />
+        {/* ✅ Header Inputs */}
+        <div className="grid grid-cols-6 gap-3 items-end">
+          {/* Company */}
+          <div>
+            <label className="text-sm font-medium">
+              Company<span className="text-red-500">*</span>
+            </label>
+            <input
+              className={`border p-2 w-full ${
+                touched.companyName && !form.companyName
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
+              value={form.companyName}
+              onChange={(e) =>
+                setForm({ ...form, companyName: e.target.value })
+              }
+              onBlur={() => setTouched({ ...touched, companyName: true })}
+            />
+          </div>
+
+          {/* GST No */}
+          <div>
+            <label className="text-sm font-medium">GST No</label>
+            <input
+              className="border border-gray-300 p-2 w-full"
+              value={form.gstNo}
+              onChange={(e) => setForm({ ...form, gstNo: e.target.value })}
+            />
+          </div>
+
+          {/* Invoice Type */}
+          <div>
+            <label className="text-sm font-medium">Type</label>
+            <select
+              className={`border p-2 w-full ${
+                touched.invoiceType && !form.invoiceType
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
+              value={form.invoiceType}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  invoiceType: e.target.value,
+                  invoiceNo: "",
+                  invoiceDate: "",
+                })
+              }
+              onBlur={() => setTouched({ ...touched, invoiceType: true })}
+            >
+              {/* <option value="">Select Type</option> */}
+              <option value="I">Invoice</option>
+              <option value="C">Challan</option>
+            </select>
+          </div>
+
+          {/* Invoice No */}
+          <div>
+            <label className="text-sm font-medium">
+              {form.invoiceType === "C" ? "Challan No" : "Invoice No"}
+              <span className="text-red-500">*</span>
+            </label>
+            <input
+              className={`border p-2 w-full ${
+                touched.invoiceNo && !form.invoiceNo
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
+              value={form.invoiceNo}
+              onChange={(e) => setForm({ ...form, invoiceNo: e.target.value })}
+              onBlur={() => setTouched({ ...touched, invoiceNo: true })}
+            />
+          </div>
+
+          {/* Invoice Date */}
+          <div>
+            <label className="text-sm font-medium">
+              {form.invoiceType === "C" ? "Challan Date" : "Invoice Date"}
+              <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              className={`border p-2 w-full ${
+                touched.invoiceDate && !form.invoiceDate
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
+              value={form.invoiceDate}
+              onChange={(e) =>
+                setForm({ ...form, invoiceDate: e.target.value })
+              }
+              onBlur={() => setTouched({ ...touched, invoiceDate: true })}
+            />
+          </div>
+
+          {/* GST % */}
+          <div>
+            <label className="text-sm font-medium">GST (in %)</label>
+            <input
+              className={`border p-2 w-full ${
+                touched.gstPercentage && !form.gstPercentage
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
+              value={form.gstPercentage}
+              onChange={(e) =>
+                setForm({ ...form, gstPercentage: e.target.value })
+              }
+              onBlur={() => setTouched({ ...touched, gstPercentage: true })}
+            />
+          </div>
         </div>
 
-        {/* Invoice Type */}
-        <div>
-          <label className="text-sm font-medium">Type</label>
-          <select
-            className={`border p-2 w-full ${
-              touched.invoiceType && !form.invoiceType
-                ? "border-red-500"
-                : "border-gray-300"
-            }`}
-            value={form.invoiceType}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                invoiceType: e.target.value,
-                invoiceNo: "",
-                invoiceDate: "",
-              })
-            }
-            onBlur={() => setTouched({ ...touched, invoiceType: true })}
-          >
-            {/* <option value="">Select Type</option> */}
-            <option value="I">Invoice</option>
-            <option value="C">Challan</option>
-          </select>
-        </div>
-
-        {/* Invoice No */}
-        <div>
-          <label className="text-sm font-medium">
-            {form.invoiceType === "C" ? "Challan No" : "Invoice No"}
-            <span className="text-red-500">*</span>
-          </label>
-          <input
-            className={`border p-2 w-full ${
-              touched.invoiceNo && !form.invoiceNo
-                ? "border-red-500"
-                : "border-gray-300"
-            }`}
-            value={form.invoiceNo}
-            onChange={(e) => setForm({ ...form, invoiceNo: e.target.value })}
-            onBlur={() => setTouched({ ...touched, invoiceNo: true })}
-          />
-        </div>
-
-        {/* Invoice Date */}
-        <div>
-          <label className="text-sm font-medium">
-            {form.invoiceType === "C" ? "Challan Date" : "Invoice Date"}
-            <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="date"
-            className={`border p-2 w-full ${
-              touched.invoiceDate && !form.invoiceDate
-                ? "border-red-500"
-                : "border-gray-300"
-            }`}
-            value={form.invoiceDate}
-            onChange={(e) => setForm({ ...form, invoiceDate: e.target.value })}
-            onBlur={() => setTouched({ ...touched, invoiceDate: true })}
-          />
-        </div>
-
-        {/* GST % */}
-        <div>
-          <label className="text-sm font-medium">GST (in %)</label>
-          <input
-            className={`border p-2 w-full ${
-              touched.gstPercentage && !form.gstPercentage
-                ? "border-red-500"
-                : "border-gray-300"
-            }`}
-            value={form.gstPercentage}
-            onChange={(e) =>
-              setForm({ ...form, gstPercentage: e.target.value })
-            }
-            onBlur={() => setTouched({ ...touched, gstPercentage: true })}
-          />
-        </div>
-      </div>
-
-      {/* ✅ Table */}
-      <div className="overflow-x-auto border border-gray-300">
-        <table className="min-w-full text-sm border-collapse">
-          <thead className="bg-slate-100">
-            <tr>
-              {[
-                "Item Code",
-                "Item Description",
-                "HSN Code",
-                "Rate",
-                "Quantity",
-                "GST Value",
-                "Total DP",
-                "Total Price",
-                "    ",
-              ].map((head, index) => (
-                <th
-                  key={head}
-                  className="border border-gray-300 p-2 text-center font-semibold"
-                >
-                  {head}
-                  {index < 5 && <span className="text-red-500 ml-1">*</span>}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody>
-            {items.map((item, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                {/* Item Code */}
-                <td className="border border-gray-300 p-1">
-                  <input
-                    className={`w-full p-1 outline-none text-center ${
-                      touched.itemCode && !item.itemCode
-                        ? "border border-red-500"
-                        : ""
-                    }`}
-                    value={item.itemCode || ""}
-                    onChange={(e) =>
-                      updateRow(index, "itemCode", e.target.value)
-                    }
-                    onBlur={() => setTouched({ ...touched, itemCode: true })}
-                  />
-                </td>
-
-                {/* Item Description */}
-                <td className="border border-gray-300 p-1">
-                  <input
-                    className={`w-full p-1 outline-none text-left ${
-                      touched.itemDesc && !item.itemDesc
-                        ? "border border-red-500"
-                        : ""
-                    }`}
-                    value={item.itemDesc || ""}
-                    onChange={(e) =>
-                      updateRow(index, "itemDesc", e.target.value)
-                    }
-                    onBlur={() => setTouched({ ...touched, itemDesc: true })}
-                  />
-                </td>
-
-                {/* HSN */}
-                <td className="border border-gray-300 p-1">
-                  <input
-                    className={`w-full p-1 outline-none text-center ${
-                      touched.hsnCode && !item.hsnCode
-                        ? "border border-red-500"
-                        : ""
-                    }`}
-                    value={item.hsnCode || ""}
-                    onChange={(e) =>
-                      updateRow(index, "hsnCode", e.target.value)
-                    }
-                    onBlur={() => setTouched({ ...touched, hsnCode: true })}
-                  />
-                </td>
-
-                {/* Rate */}
-                <td className="border border-gray-300 p-1">
-                  <input
-                    type="number"
-                    className={`w-full p-1 outline-none text-right ${
-                      touched.rateDp && !item.rateDp
-                        ? "border border-red-500"
-                        : ""
-                    }`}
-                    value={item.rateDp || ""}
-                    onChange={(e) => updateRow(index, "rateDp", e.target.value)}
-                    onBlur={() => setTouched({ ...touched, rateDp: true })}
-                  />
-                </td>
-
-                {/* Quantity */}
-                <td className="border border-gray-300 p-1">
-                  <input
-                    type="number"
-                    className={`w-full p-1 outline-none text-right ${
-                      touched.quantity && !item.quantity
-                        ? "border border-red-500"
-                        : ""
-                    }`}
-                    value={item.quantity || ""}
-                    onChange={(e) =>
-                      updateRow(index, "quantity", e.target.value)
-                    }
-                    onBlur={() => setTouched({ ...touched, quantity: true })}
-                  />
-                </td>
-
-                {/* GST Value (auto) */}
-                <td className="border border-gray-300 p-1">
-                  <input
-                    className="w-full p-1 outline-none text-right"
-                    value={item.gstValue || 0}
-                    readOnly
-                  />
-                </td>
-
-                {/* Total DP */}
-                <td className="border border-gray-300 p-1">
-                  <input
-                    className="w-full p-1 outline-none text-right"
-                    value={item.totalDp || 0}
-                    readOnly
-                  />
-                </td>
-
-                {/* Total Price */}
-                <td className="border border-gray-300 p-1">
-                  <input
-                    className="w-full p-1 outline-none text-right"
-                    value={item.totalPrice || 0}
-                    readOnly
-                  />
-                </td>
-                {/*Delete Button*/}
-                <td className="relative border border-gray-300 p-2 pr-0">
-                  <input className="w-full px-2 py-1 bg-transparent outline-none" />
-
-                  {/* Delete Icon */}
-                  <button
-                    type="button"
-                    onClick={() => deleteRow(index)}
-                    className="absolute right-6 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100 hover:bg-red-100 p-1 rounded-full transition"
+        {/* ✅ Table */}
+        <div className="overflow-x-auto border border-gray-300">
+          <table className="min-w-full text-m border-collapse">
+            <thead className="bg-slate-100">
+              <tr>
+                {[
+                  "Item Code",
+                  "Item Description",
+                  "HSN Code",
+                  "Rate",
+                  "Quantity",
+                  "GST Value",
+                  "Total DP",
+                  "Total Price",
+                  "    ",
+                ].map((head, index) => (
+                  <th
+                    key={head}
+                    className="border border-gray-300 p-2 text-center font-semibold"
                   >
-                    <img src={deleteIcon} alt="delete" className="w-4 h-4" />
-                  </button>
-                </td>
+                    {head}
+                    {index < 5 && <span className="text-red-500 ml-1">*</span>}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
 
-      {/* ✅ Buttons */}
-      <div className="flex justify-end gap-3">
-        <button
-          onClick={addRow}
-          className="bg-slate-800 text-white px-4 py-3 
+            <tbody>
+              {items.map((item, index) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  {/* Item Code */}
+                  <td className="border border-gray-300 p-1 relative">
+                    <div className="flex items-center gap-1">
+                      <input
+                        className={`flex-1 p-1 outline-none text-center min-w-0 ${
+                          touched.itemCode && !item.itemCode
+                            ? "border border-red-500"
+                            : ""
+                        }`}
+                        value={item.itemCode || ""}
+                        onChange={(e) =>
+                          updateRow(index, "itemCode", e.target.value)
+                        }
+                        onBlur={() =>
+                          setTouched({ ...touched, itemCode: true })
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleItemCodeSearch(index);
+                        }}
+                      />
+                      {/* 🔍 Search Button */}
+                      <button
+                        type="button"
+                        title="Search item description"
+                        onClick={(e) => handleItemCodeSearch(index, e)}
+                        className="flex-shrink-0 p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition"
+                      >
+                        {itemSearchLoading[index] ? (
+                          <span className="inline-block w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Search size={13} />
+                        )}
+                      </button>
+                    </div>
+                  </td>
+
+                  {/* Item Description — readOnly, filled by search */}
+                  <td className="border border-gray-300 p-1">
+                    <input
+                      readOnly
+                      className={`w-full p-1 outline-none text-left bg-gray-50 cursor-default ${
+                        touched.itemDesc && !item.itemDesc
+                          ? "border border-red-500"
+                          : ""
+                      }`}
+                      value={item.itemDesc || ""}
+                      onBlur={() => setTouched({ ...touched, itemDesc: true })}
+                    />
+                  </td>
+
+                  {/* HSN */}
+                  <td className="border border-gray-300 p-1">
+                    <input
+                      className={`w-full p-1 outline-none text-center ${
+                        touched.hsnCode && !item.hsnCode
+                          ? "border border-red-500"
+                          : ""
+                      }`}
+                      value={item.hsnCode || ""}
+                      onChange={(e) =>
+                        updateRow(index, "hsnCode", e.target.value)
+                      }
+                      onBlur={() => setTouched({ ...touched, hsnCode: true })}
+                    />
+                  </td>
+
+                  {/* Rate */}
+                  <td className="border border-gray-300 p-1">
+                    <input
+                      type="number"
+                      className={`w-full p-1 outline-none text-right ${
+                        touched.rateDp && !item.rateDp
+                          ? "border border-red-500"
+                          : ""
+                      }`}
+                      value={item.rateDp || ""}
+                      onChange={(e) =>
+                        updateRow(index, "rateDp", e.target.value)
+                      }
+                      onBlur={() => setTouched({ ...touched, rateDp: true })}
+                    />
+                  </td>
+
+                  {/* Quantity */}
+                  <td className="border border-gray-300 p-1">
+                    <input
+                      type="number"
+                      className={`w-full p-1 outline-none text-right ${
+                        touched.quantity && !item.quantity
+                          ? "border border-red-500"
+                          : ""
+                      }`}
+                      value={item.quantity || ""}
+                      onChange={(e) =>
+                        updateRow(index, "quantity", e.target.value)
+                      }
+                      onBlur={() => setTouched({ ...touched, quantity: true })}
+                    />
+                  </td>
+
+                  {/* GST Value (auto) */}
+                  <td className="border border-gray-300 p-1">
+                    <input
+                      className="w-full p-1 outline-none text-right"
+                      value={item.gstValue || 0}
+                      readOnly
+                    />
+                  </td>
+
+                  {/* Total DP */}
+                  <td className="border border-gray-300 p-1">
+                    <input
+                      className="w-full p-1 outline-none text-right"
+                      value={item.totalDp || 0}
+                      readOnly
+                    />
+                  </td>
+
+                  {/* Total Price */}
+                  <td className="border border-gray-300 p-1">
+                    <input
+                      className="w-full p-1 outline-none text-right"
+                      value={item.totalPrice || 0}
+                      readOnly
+                    />
+                  </td>
+                  {/*Delete Button*/}
+                  <td className="relative border border-gray-300 p-0 pr-0">
+                    <input className="w-full px-2 py-1 bg-transparent outline-none invisible pointer-events-none" />
+
+                    {/* Delete Icon */}
+                    <button
+                      type="button"
+                      onClick={() => deleteRow(index)}
+                      className="absolute inset-0 m-auto flex justify-center items-center w-8 h-8 rounded-full hover:bg-red-100 transition"
+                    >
+                      <img
+                        src={deleteIcon}
+                        alt="delete"
+                        className="w-4 h-6 object-contain"
+                      />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* ✅ Buttons */}
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={addRow}
+            className="bg-slate-800 text-white px-4 py-3 
              transition duration-300 ease-in-out 
              hover:bg-slate-700 hover:scale-105 active:scale-95"
-        >
-          Add
-        </button>
+          >
+            Add
+          </button>
 
-        <button
-          onClick={handleSave}
-          className="bg-green-600 text-white px-4 py-3 
+          <button
+            onClick={handleSave}
+            className="bg-green-600 text-white px-4 py-3 
            transition-all duration-300 
            hover:bg-green-700 hover:shadow-lg hover:-translate-y-1 
            active:scale-95"
-        >
-          Save
-        </button>
+          >
+            Save
+          </button>
+        </div>
       </div>
-    </div>
+
+      {/* 📋 Portal dropdown — premium floating search results */}
+      {dropdownPos &&
+        itemSearchResults[dropdownPos.index]?.length > 0 &&
+        createPortal(
+          <div
+            style={{
+              position: "absolute",
+              top: dropdownPos.top,
+              left:
+                typeof window !== "undefined"
+                  ? Math.max(
+                      16 + window.scrollX,
+                      Math.min(
+                        dropdownPos.left,
+                        window.scrollX +
+                          window.innerWidth -
+                          Math.min(
+                            Math.max(dropdownPos.width + 180, 340),
+                            420,
+                            window.innerWidth - 32,
+                          ) -
+                          16,
+                      ),
+                    )
+                  : dropdownPos.left,
+              width: Math.max(dropdownPos.width + 180, 340),
+              maxWidth: "min(420px, calc(100vw - 32px))",
+              zIndex: 9999,
+              boxShadow:
+                "0 10px 30px rgba(0,0,0,0.12), 0 2px 10px rgba(0,0,0,0.08)",
+              borderRadius: "14px",
+              animation: "fadeInDown 0.18s ease",
+            }}
+            className="bg-white rounded-xl border border-slate-200 overflow-hidden"
+          >
+            {/* Header */}
+            <div
+              style={{
+                background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)",
+              }}
+              className="flex items-center justify-between px-4 py-2.5"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-white text-sm font-semibold">
+                  Search Results
+                </span>
+                <span
+                  style={{ background: "rgba(255,255,255,0.2)" }}
+                  className="text-white text-xs font-bold px-2 py-0.5 rounded-full"
+                >
+                  {itemSearchResults[dropdownPos.index].length}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setDropdownPos(null);
+                  setItemSearchResults({});
+                }}
+                className="text-slate-300 hover:text-white transition text-lg leading-none"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Sub-label */}
+            <p className="text-xs text-slate-400 px-4 py-1.5 bg-slate-50 border-b border-slate-100">
+              Click an item to auto-fill the row
+            </p>
+
+            {/* Scrollable list */}
+            <div
+              style={{
+                maxHeight: "260px",
+                overflowY: "auto",
+                scrollbarWidth: "thin",
+                scrollbarColor: "#94a3b8 transparent",
+              }}
+            >
+              {itemSearchResults[dropdownPos.index].map((res, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => selectItemFromSearch(dropdownPos.index, res)}
+                  style={{ transition: "background 0.12s" }}
+                  className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 group hover:bg-blue-50 border-b border-slate-100 last:border-0 flex items-start gap-2 sm:gap-3"
+                >
+                  {/* Number badge */}
+                  <span
+                    style={{ minWidth: 24, minHeight: 24 }}
+                    className="mt-0.5 flex items-center justify-center rounded-full bg-slate-100 group-hover:bg-blue-100 text-slate-500 group-hover:text-blue-600 text-xs font-bold transition flex-shrink-0"
+                  >
+                    {i + 1}
+                  </span>
+
+                  <span className="flex flex-col min-w-0 flex-1">
+                    <span className="font-semibold text-slate-800 text-sm leading-snug break-words whitespace-normal group-hover:text-blue-700 transition">
+                      {res.itemDescription || res.description || res.name}
+                    </span>
+                    {res.itemCode && (
+                      <span className="text-xs text-slate-400 mt-1 font-mono tracking-wide break-all">
+                        {res.itemCode}
+                      </span>
+                    )}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>,
+          document.body,
+        )}
+    </>
   );
 }

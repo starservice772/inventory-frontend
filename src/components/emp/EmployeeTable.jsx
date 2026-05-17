@@ -13,6 +13,7 @@ import ActionMenu from "../../components/emp/EmployeeAction";
 import EditEmployeeModal from "./EditEmployee";
 
 import { addValidateForm, editValidateForm } from "./EmployeeValidate";
+import { addValidateForm, editValidateForm } from "./EmployeeValidate";
 
 import toast from "react-hot-toast";
 
@@ -334,45 +335,44 @@ function EmployeePage() {
                 </button>
             </div>
 
-            {/* Table */}
-            <table className="w-full text-left">
+      {/* Table */}
+      <table className="w-full text-left">
+        <thead className="bg-slate-50 text-slate-600">
+          <tr>
+            <th className="p-4 text-left">Name</th>
+            <th className="p-4 text-left">Phone</th>
+            <th className="p-4 text-left">Employee Code</th>
+            <th className="p-4 text-left">Gender</th>
+            <th className="p-4 text-left">Company</th>
+            <th className="p-4 text-left">Designation</th>
+            <th className="p-4 text-left">Status</th>
+            <th className="p-4 text-left">Action</th>
+          </tr>
+        </thead>
 
-                <thead className="bg-slate-50 text-slate-600">
-                    <tr>
-                        <th className="p-4 text-left">Name</th>
-                        <th className="p-4 text-left">Phone</th>
-                        <th className="p-4 text-left">Employee Code</th>
-                        <th className="p-4 text-left">Gender</th>
-                        <th className="p-4 text-left">Company</th>
-                        <th className="p-4 text-left">Designation</th>
-                        <th className="p-4 text-left">Status</th>
-                        <th className="p-4 text-left">Action</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {employees.map((emp) => (
-                        <tr key={emp.id} className="border-t hover:bg-gray-50">
-                            <td className="p-3">{emp.name}</td>
-                            <td className="p-3">{emp.phone}</td>
-                            <td className="p-3">{emp.employeeCode}</td>
-                            <td className="p-3">{emp.gender}</td>
-                            <td className="p-3">{emp.company}</td>
-                            <td className="p-3">{emp.role}</td>
-                            <td className="p-3">
-                                <span
-                                    className={`px-2 py-1 text-xs rounded-full ${emp.status === "ACTIVE"
-                                        ? "bg-green-100 text-green-600"
-                                        : "bg-red-100 text-red-600"
-                                        }`}
-                                >
-                                    {emp.status}
-                                </span>
-                            </td>
-                            {/* Employee Actions */}
-                            <td>
-
-                                {/* Three dots button
+        <tbody>
+          {employees.map((emp) => (
+            <tr key={emp.id} className="border-t hover:bg-gray-50">
+              <td className="p-3">{emp.name}</td>
+              <td className="p-3">{emp.phone}</td>
+              <td className="p-3">{emp.employeeCode}</td>
+              <td className="p-3">{emp.gender}</td>
+              <td className="p-3">{emp.company}</td>
+              <td className="p-3">{emp.role}</td>
+              <td className="p-3">
+                <span
+                  className={`px-2 py-1 text-xs rounded-full ${
+                    emp.status === "ACTIVE"
+                      ? "bg-green-100 text-green-600"
+                      : "bg-red-100 text-red-600"
+                  }`}
+                >
+                  {emp.status}
+                </span>
+              </td>
+              {/* Employee Actions */}
+              <td>
+                {/* Three dots button
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -406,49 +406,46 @@ function EmployeePage() {
                 handleUpdate={handleUpdate}
             />
 
-            {/* Create Employee Modal */}
-            <EmployeeModal
-                key={form.id || "create"}
-                showModal={showModal}
-                setShowModal={setShowModal}
-                form={form}
-                handleChange={handleChange}
-                handleSubmit={handleSubmit}
-                onClose={() => setShowModal(false)}
-            />
+      {/* Create Employee Modal */}
+      <EmployeeModal
+        key={form.id || "create"}
+        showModal={showModal}
+        setShowModal={setShowModal}
+        form={form}
+        handleChange={handleChange}
+        handleSubmit={handleSubmit}
+        onClose={() => setShowModal(false)}
+      />
 
-            {/* Pagination */}
-            <div className="flex justify-end gap-3 p-4 border-t">
-
-                <button
-                    disabled={page === 0}
-                    onClick={() => setPage((p) => Math.max(p - 1, 0))}
-                    className="px-4 py-2 border rounded-lg bg-gray-100 
+      {/* Pagination */}
+      <div className="flex justify-end gap-3 p-4 border-t">
+        <button
+          disabled={page === 0}
+          onClick={() => setPage((p) => Math.max(p - 1, 0))}
+          className="px-4 py-2 border rounded-lg bg-gray-100 
                         hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed 
                         transition"
-                >
-                    Prev
-                </button>
+        >
+          Prev
+        </button>
 
-                {/* Page Info */}
-                <span className="px-4 py-2 text-sm font-medium text-gray-700">
-                    Page {page + 1} / {totalPages || 1}
-                </span>
+        {/* Page Info */}
+        <span className="px-4 py-2 text-sm font-medium text-gray-700">
+          Page {page + 1} / {totalPages || 1}
+        </span>
 
-                <button
-                    disabled={page + 1 >= totalPages}
-                    onClick={() => setPage((p) => p + 1)}
-                    className="px-4 py-2 border rounded-lg bg-gray-100 
+        <button
+          disabled={page + 1 >= totalPages}
+          onClick={() => setPage((p) => p + 1)}
+          className="px-4 py-2 border rounded-lg bg-gray-100 
                         hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed 
                         transition"
-                >
-                    Next
-                </button>
-
-            </div>
-        </div>
-
-    );
-};
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default EmployeePage;
