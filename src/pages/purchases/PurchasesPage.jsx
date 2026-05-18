@@ -469,20 +469,6 @@ export default function PurchasesPage() {
                     </div>
                   </td>
 
-                  {/* Item Description — readOnly, filled by search */}
-                  <td className="border border-gray-300 p-1">
-                    <input
-                      readOnly
-                      className={`w-full p-1 outline-none text-left bg-gray-50 cursor-default ${
-                        touched.itemDesc && !item.itemDesc
-                          ? "border border-red-500"
-                          : ""
-                      }`}
-                      value={item.itemDesc || ""}
-                      onBlur={() => setTouched({ ...touched, itemDesc: true })}
-                    />
-                  </td>
-
                   {/* HSN */}
                   <td className="border border-gray-300 p-1">
                     <input
