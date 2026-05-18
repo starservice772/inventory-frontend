@@ -12,6 +12,7 @@ import {
   FileSpreadsheet,
   User,
   IdCardLanyard,
+  PackageOpen,
   Menu,
   X,
 } from "lucide-react";
@@ -28,6 +29,12 @@ const links = [
     to: "/employee",
     label: "Employee",
     icon: IdCardLanyard,
+    roles: ["ROLE_ADMIN"],
+  },
+  {
+    to: "/item",
+    label: "Items",
+    icon: PackageOpen,
     roles: ["ROLE_ADMIN"],
   },
 ];
