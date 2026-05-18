@@ -6,6 +6,12 @@ import deleteIcon from "../../assets/delete_Icon.png";
 import { Search } from "lucide-react";
 
 export default function PurchasesPage() {
+  const [tooltip, setTooltip] = useState({
+    visible: false,
+    text: "",
+    x: 0,
+    y: 0,
+  });
   // ✅ Separate form state (header)
   const [form, setForm] = useState({
     companyName: "",
@@ -469,20 +475,56 @@ export default function PurchasesPage() {
                     </div>
                   </td>
 
-                  {/* Item Description — readOnly, filled by search */}
+                  {/* Item Description */}
                   <td className="border border-gray-300 p-1">
-                    <input
-                      readOnly
-                      className={`w-full p-1 outline-none text-left bg-gray-50 cursor-default ${
-                        touched.itemDesc && !item.itemDesc
-                          ? "border border-red-500"
-                          : ""
-                      }`}
-                      value={item.itemDesc || ""}
-                      onBlur={() => setTouched({ ...touched, itemDesc: true })}
-                    />
-                  </td>
+                    <div className="flex items-center gap-1 w-full">
+                      {/* Input */}
+                      <input
+                        readOnly
+                        className={`w-full p-1 outline-none text-left bg-gray-50 cursor-default ${
+                          touched.itemDesc && !item.itemDesc
+                            ? "border border-red-500"
+                            : ""
+                        }`}
+                        value={item.itemDesc || ""}
+                        onBlur={() =>
+                          setTouched({ ...touched, itemDesc: true })
+                        }
+                      />
 
+                      {/* Dots */}
+                      {item.itemDesc?.length > 20 && (
+                        <span
+                          className="cursor-pointer font-bold px-1 flex-shrink-0"
+                          onMouseEnter={(e) => {
+                            setTooltip({
+                              visible: true,
+                              text: item.itemDesc,
+                              x: e.clientX,
+                              y: e.clientY,
+                            });
+                          }}
+                          onMouseMove={(e) => {
+                            setTooltip((prev) => ({
+                              ...prev,
+                              x: e.clientX,
+                              y: e.clientY,
+                            }));
+                          }}
+                          onMouseLeave={() => {
+                            setTooltip({
+                              visible: false,
+                              text: "",
+                              x: 0,
+                              y: 0,
+                            });
+                          }}
+                        >
+                          ...
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   {/* HSN */}
                   <td className="border border-gray-300 p-1">
                     <input
@@ -580,6 +622,26 @@ export default function PurchasesPage() {
               ))}
             </tbody>
           </table>
+          {/* Global Tooltip */}
+          {tooltip.visible && (
+            <div
+              className="fixed z-[99999] pointer-events-none"
+              style={{
+                left: tooltip.x + 15,
+                top: tooltip.y + 15,
+              }}
+            >
+              <div
+                className="w-96 max-w-[32rem]
+          bg-gray-300 text-black
+          text-sm leading-relaxed
+          p-3 rounded-lg shadow-2xl
+          break-words whitespace-normal"
+              >
+                {tooltip.text}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ✅ Buttons */}
