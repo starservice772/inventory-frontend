@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 // import { createUser } from "../api/userService";
 
+// import { createUser } from "../api/userService";
+
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -236,7 +238,23 @@ function UserForm({ user, onSuccess }) {
           )}
         </div>
 
-        {/* Role — full width */}
+        {/* Company */}
+        <div>
+          <label className="text-sm text-gray-600">Company</label>
+          <input
+            name="company"
+            value={formData.company}
+            onChange={handleChange}
+            disabled
+            className={`w-full border p-2 rounded mt-1 
+    ${errors.company ? "border-red-500" : "border-gray-300"}`}
+          />
+          {errors.company && (
+            <p className="text-red-500 text-xs">{errors.company}</p>
+          )}
+        </div>
+
+        {/* Role */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-600 mb-1">Role</label>
           <select
