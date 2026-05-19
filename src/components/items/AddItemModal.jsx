@@ -50,7 +50,7 @@ export default function AddItemModal({
                             value={form.itemCode}
                             onChange={handleChange}
                             placeholder="Enter item code"
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-600"
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-600"
                             required
                         />
                     </div>
@@ -60,12 +60,13 @@ export default function AddItemModal({
                         <label className="block text-lg font-medium text-gray-700 mb-2">
                             Item Description
                         </label>
-                        <input
+                        <textarea
                             name="itemDescription"
+                            rows={7}
                             value={form.itemDescription}
                             onChange={handleChange}
                             placeholder="Enter item description"
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-600"
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-600"
                             required
                         />
                     </div>

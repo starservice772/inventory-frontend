@@ -27,11 +27,10 @@ function Field({ label, name, type = "text", disabled = false, formData, errors,
         value={formData[name]}
         onChange={onChange}
         disabled={disabled}
-        className={`w-full border px-3 py-2 rounded-lg text-sm outline-none transition focus:ring-2 ${
-          errors[name]
+        className={`w-full border px-3 py-2 rounded-lg text-sm outline-none transition focus:ring-2 ${errors[name]
             ? "border-red-400 focus:ring-red-200 bg-red-50"
             : "border-gray-300 focus:ring-blue-200"
-        } ${disabled ? "bg-gray-100 cursor-not-allowed text-gray-500" : ""}`}
+          } ${disabled ? "bg-gray-100 cursor-not-allowed text-gray-500" : ""}`}
       />
       {errors[name] && (
         <p className="text-red-500 text-xs mt-1">⚠ {errors[name]}</p>
@@ -186,11 +185,11 @@ function UserForm({ user, onSuccess }) {
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4" noValidate>
 
-        <Field label="Full Name"     name="name"     {...fieldProps} />
-        <Field label="Username"      name="username" {...fieldProps} />
-        <Field label="Email Address" name="email"    type="email" {...fieldProps} />
-        <Field label="Phone Number"  name="phone"    type="tel"   {...fieldProps} />
-        <Field label="Company"       name="company"  disabled     {...fieldProps} />
+        <Field label="Full Name" name="name"     {...fieldProps} />
+        <Field label="Username" name="username" {...fieldProps} />
+        <Field label="Email Address" name="email" type="email" {...fieldProps} />
+        <Field label="Phone Number" name="phone" type="tel"   {...fieldProps} />
+        <Field label="Company" name="company" disabled     {...fieldProps} />
 
         {/* Password — custom because of show/hide toggle */}
         <div>
@@ -201,11 +200,10 @@ function UserForm({ user, onSuccess }) {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className={`w-full border px-3 py-2 pr-14 rounded-lg text-sm outline-none transition focus:ring-2 ${
-                errors.password
+              className={`w-full border px-3 py-2 pr-14 rounded-lg text-sm outline-none transition focus:ring-2 ${errors.password
                   ? "border-red-400 focus:ring-red-200 bg-red-50"
                   : "border-gray-300 focus:ring-blue-200"
-              }`}
+                }`}
             />
             <button
               type="button"
@@ -220,21 +218,21 @@ function UserForm({ user, onSuccess }) {
           )}
         </div>
 
-        {/* Phone */}
+        {/* Phone
         <div>
           <label className="text-sm text-gray-600">Phone</label>
           <input
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            
+
             className={`w-full border p-2 rounded mt-1 
     ${errors.phone ? "border-red-500" : "border-gray-300"}`}
           />
           {errors.phone && (
             <p className="text-red-500 text-xs">{errors.phone}</p>
           )}
-        </div>
+        </div> */}
 
         {/* Role — full width */}
         <div className="md:col-span-2">
@@ -243,11 +241,10 @@ function UserForm({ user, onSuccess }) {
             name="role"
             value={formData.role}
             onChange={handleChange}
-            className={`w-full border px-3 py-2 rounded-lg text-sm outline-none transition focus:ring-2 ${
-              errors.role
+            className={`w-full border px-3 py-2 rounded-lg text-sm outline-none transition focus:ring-2 ${errors.role
                 ? "border-red-400 focus:ring-red-200"
                 : "border-gray-300 focus:ring-blue-200"
-            }`}
+              }`}
           >
             <option value="ROLE_MANAGER">Manager</option>
             <option value="ROLE_ADMIN">Admin</option>

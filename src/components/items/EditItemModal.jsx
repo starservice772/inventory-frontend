@@ -50,10 +50,11 @@ export default function EditItemModal({
                         <label className="block text-lg font-medium text-gray-700 mb-2">
                             Item Description
                         </label>
-                        <input
+                        <textarea
                             name="itemDescription"
                             value={form.itemDescription}
                             onChange={handleChange}
+                            rows={7}
                             placeholder="Enter item description"
                             className="w-full px-4 py-3 rounded-lg border border-gray-300
                          focus:outline-none focus:ring-2 focus:ring-blue-500

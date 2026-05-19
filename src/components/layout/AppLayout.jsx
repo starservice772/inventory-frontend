@@ -162,7 +162,7 @@ export default function AppLayout() {
         </div>
 
         {/* CONTENT */}
-        <div className="p-6 mt-10">
+        <div className="p-3">
           <div className="bg-white rounded-2xl shadow-sm min-h-[calc(100vh-3rem)] p-4 md:p-6 overflow-y-auto">
             <Outlet />
           </div>
