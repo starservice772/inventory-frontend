@@ -12,6 +12,7 @@ import {
   FileSpreadsheet,
   User,
   IdCardLanyard,
+  PackageOpen,
   Menu,
   X,
 } from "lucide-react";
@@ -28,6 +29,12 @@ const links = [
     to: "/employee",
     label: "Employee",
     icon: IdCardLanyard,
+    roles: ["ROLE_ADMIN"],
+  },
+  {
+    to: "/item",
+    label: "Items",
+    icon: PackageOpen,
     roles: ["ROLE_ADMIN"],
   },
 ];
@@ -155,7 +162,7 @@ export default function AppLayout() {
         </div>
 
         {/* CONTENT */}
-        <div className="p-6 mt-10">
+        <div className="p-3">
           <div className="bg-white rounded-2xl shadow-sm min-h-[calc(100vh-3rem)] p-4 md:p-6 overflow-y-auto">
             <Outlet />
           </div>
