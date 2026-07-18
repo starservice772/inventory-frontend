@@ -29,7 +29,7 @@ export const searchItemByCode = async (itemCode) => {
   if (!res.ok) throw new Error("Failed to search item by code");
 
   const raw = await res.json();
-  console.log("🔍 Search raw response:", JSON.stringify(raw));
+  // console.log("🔍 Search raw response:", JSON.stringify(raw));
 
   // Unwrap envelope: { success, message, data: [...] or data: {...} }
   const payload = raw?.data ?? raw?.items ?? raw?.content ?? raw;

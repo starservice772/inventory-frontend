@@ -43,7 +43,7 @@ export default function AddItemModal({
                     {/* Item Code */}
                     <div>
                         <label className="block text-lg font-medium text-gray-700 mb-2">
-                            Item Code
+                            Item Code <span className="text-red-500">*</span>
                         </label>
                         <input
                             name="itemCode"
@@ -55,14 +55,29 @@ export default function AddItemModal({
                         />
                     </div>
 
+                    {/* HSN Code */}
+                    <div>
+                        <label className="block text-lg font-medium text-gray-700 mb-2">
+                            HSN Code <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            name="hsnCode"
+                            value={form.hsnCode}
+                            onChange={handleChange}
+                            placeholder="Enter HSN code"
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-600"
+                            required
+                        />
+                    </div>
+
                     {/* Item Description */}
                     <div>
                         <label className="block text-lg font-medium text-gray-700 mb-2">
-                            Item Description
+                            Item Description <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             name="itemDescription"
-                            rows={7}
+                            rows={5}
                             value={form.itemDescription}
                             onChange={handleChange}
                             placeholder="Enter item description"
