@@ -33,6 +33,7 @@ const EmployeeModal = ({
           {/* Full Name */}
           <div>
             <label className="text-sm text-gray-700">Full Name</label>
+             <span className="text-red-500">*</span>
             <input
               name="name"
               value={form.name}
@@ -44,6 +45,7 @@ const EmployeeModal = ({
           {/* Phone */}
           <div>
             <label className="text-sm text-gray-700">Phone No.</label>
+             <span className="text-red-500">*</span>
             <input
               name="phone"
               value={form.phone}
@@ -56,6 +58,7 @@ const EmployeeModal = ({
           {/* Employee Code */}
           <div>
             <label className="text-sm text-gray-700">Employee Code</label>
+             <span className="text-red-500">*</span>
             <input
               name="employeeCode"
               value={form.employeeCode}
@@ -67,6 +70,7 @@ const EmployeeModal = ({
           {/* Gender */}
           <div>
             <label className="text-sm text-gray-700">Gender</label>
+             <span className="text-red-500">*</span>
             <select
               name="gender"
               value={form.gender}
@@ -81,6 +85,7 @@ const EmployeeModal = ({
           {/* Role */}
           <div className="md:col-span-2">
             <label className="text-sm text-gray-700">Designation</label>
+             <span className="text-red-500">*</span>
             <input
               name="role"
               value={form.role}
