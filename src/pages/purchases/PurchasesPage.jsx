@@ -550,6 +550,7 @@ export default function PurchasesPage() {
                     />
                   </td>
 
+
                   {/* Rate */}
                   <td className="border border-gray-300 p-1">
                     <input
