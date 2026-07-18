@@ -25,6 +25,7 @@ export default function ItemPage() {
   const [form, setForm] = useState({
     itemCode: "",
     itemDescription: "",
+    hsnCode: ""
   });
 
   const handleChange = (e) => {
@@ -39,6 +40,7 @@ export default function ItemPage() {
     setForm({
       itemCode: "",
       itemDescription: "",
+      hsnCode: ""
     });
 
     setShowModal(true);
@@ -59,6 +61,7 @@ export default function ItemPage() {
       setForm({
         itemCode: "",
         itemDescription: "",
+        hsnCode: ""
       });
 
       // Reload first page so new item appears
@@ -79,6 +82,7 @@ export default function ItemPage() {
         id: itemDetails.id,
         itemCode: itemDetails.itemCode || "",
         itemDescription: itemDetails.itemDescription || "",
+        hsnCode: itemDetails.hsnCode || "",
         createdDate: itemDetails.createdDate || "",
         updatedDate: itemDetails.updatedDate || "",
       });
@@ -101,6 +105,7 @@ export default function ItemPage() {
         id: form.id,
         itemCode: form.itemCode,
         itemDescription: form.itemDescription,
+        hsnCode: form.hsnCode
       });
 
       toast.success("Item updated successfully ✅");
@@ -293,7 +298,7 @@ export default function ItemPage() {
           <tr>
             <th className="p-4 text-left">Item Code</th>
             <th className="p-4 text-left">Item Description</th>
-            {/* <th className="p-3">Status</th> */}
+            <th className="p-4 text-left">HSN Code</th>
             <th className="p-4 text-left">Created Date</th>
             <th className="p-4 text-left">Updated Date</th>
             <th className="p-4 text-left">Action</th>
@@ -313,7 +318,7 @@ export default function ItemPage() {
                   maxLength={30}
                 />
               </td>
-              {/* <td className="p-3">{item.status}</td> */}
+              <td className="p-3">{item.hsnCode}</td>
               <td className="p-3">{item.createdDate}</td>
               <td className="p-3">{item.updatedDate}</td>
               <td>

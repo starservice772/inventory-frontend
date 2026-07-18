@@ -139,14 +139,21 @@ export default function PurchasesPage() {
     try {
       const results = await searchItemByCode(itemCode);
 
+      // console.log(results)
+
       if (!results || results.length === 0) {
         toast.error("No items found for this code");
         return;
       }
 
       if (results.length === 1) {
-        updateRow(index, "itemDesc", results[0].itemDescription || "");
+        const res=results[0]
+        updateRow(index, "itemDesc", res.itemDescription || "");
+        updateRow(index, "hsnCode", res.hsnCode || "");
+        
         toast.success("Item description filled!");
+
+        return
       } else {
         // Multiple → show portal dropdown below the search button
         setDropdownPos({
@@ -173,6 +180,7 @@ export default function PurchasesPage() {
       itemCode: result.itemCode || updated[index].itemCode,
       itemDesc:
         result.itemDescription || result.description || result.name || "",
+      hsnCode:  result.hsnCode || result.HSNcode || result.code || ""
     };
     setItems(updated);
     setItemSearchResults((prev) => ({ ...prev, [index]: [] }));
@@ -528,6 +536,7 @@ export default function PurchasesPage() {
                   {/* HSN */}
                   <td className="border border-gray-300 p-1">
                     <input
+                    readOnly
                       className={`w-full p-1 outline-none text-center ${
                         touched.hsnCode && !item.hsnCode
                           ? "border border-red-500"
@@ -767,9 +776,18 @@ export default function PurchasesPage() {
                     <span className="font-semibold text-slate-800 text-sm leading-snug break-words whitespace-normal group-hover:text-blue-700 transition">
                       {res.itemDescription || res.description || res.name}
                     </span>
+
+                    {/* For viewing Item Code */}
                     {res.itemCode && (
                       <span className="text-xs text-slate-400 mt-1 font-mono tracking-wide break-all">
-                        {res.itemCode}
+                        Item code: {res.itemCode}
+                      </span>
+                    )}
+
+                    {/* For viewing HSN code */}
+                    {res.hsnCode && (
+                      <span className="text-xs text-slate-400 mt-1 font-mono tracking-wide break-all">
+                        HSN code: {res.hsnCode}
                       </span>
                     )}
                   </span>

@@ -35,7 +35,7 @@ export default function EditItemModal({
                     {/* Item Code (Read Only) */}
                     <div>
                         <label className="block text-lg font-medium text-gray-700 mb-2">
-                            Item Code
+                            Item Code <span className="text-red-500">*</span>
                         </label>
                         <input
                             name="itemCode"
@@ -45,10 +45,27 @@ export default function EditItemModal({
                         />
                     </div>
 
+                    {/* HSN Code (Editable) */}
+                    <div>
+                        <label className="block text-lg font-medium text-gray-700 mb-2">
+                            HSN Code <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            name="hsnCode"
+                            value={form.hsnCode}
+                            onChange={handleChange}
+                            placeholder="Enter HSN Code"
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300
+                         focus:outline-none focus:ring-2 focus:ring-blue-500
+                         focus:border-blue-500"
+                            required
+                        />
+                    </div>
+
                     {/* Item Description (Editable) */}
                     <div>
                         <label className="block text-lg font-medium text-gray-700 mb-2">
-                            Item Description
+                            Item Description <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             name="itemDescription"
