@@ -13,6 +13,7 @@ import {
   User,
   IdCardLanyard,
   PackageOpen,
+  AlertTriangle,
   Menu,
   X,
 } from "lucide-react";
@@ -35,6 +36,12 @@ const links = [
     to: "/item",
     label: "Items",
     icon: PackageOpen,
+    roles: ["ROLE_ADMIN"],
+  },
+  {
+    to: "/defective-items",
+    label: "Defective Items",
+    icon: AlertTriangle,
     roles: ["ROLE_ADMIN"],
   },
 ];

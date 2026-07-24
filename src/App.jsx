@@ -10,30 +10,32 @@ import ReportsPage from "./pages/reports/ReportsPage";
 import AdminPage from "./pages/admin/AdminPage";
 import EmployeePage from "./pages/employee/EmployeePage";
 import ItemPage from "./pages/item/itemPage";
-
+import DefectiveItemPage from "./pages/defectiveItem/DefectiveItemPage";
 
 import ProtectedRoute from "./components/protectedRoute";
 
 import { Toaster } from "react-hot-toast";
 
-
-
 export default function App() {
   return (
     <>
-      <Toaster position="top-right" toastOptions={{ duration: 5000 }} reverseOrder={false} />
+      <Toaster
+        position="top-right"
+        toastOptions={{ duration: 5000 }}
+        reverseOrder={false}
+      />
 
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
 
-        <Route path="/login" element={<LoginPage />}/>
-
-        <Route path="/" element={
-          <ProtectedRoute>
-            <AppLayout />
-          </ProtectedRoute>
-        }
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
         >
-
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="purchases" element={<PurchasesPage />} />
@@ -44,6 +46,7 @@ export default function App() {
           <Route path="admin" element={<AdminPage />} />
           <Route path="employee" element={<EmployeePage />} />
           <Route path="item" element={<ItemPage />} />
+          <Route path="defective-items" element={<DefectiveItemPage />} />
         </Route>
       </Routes>
     </>
