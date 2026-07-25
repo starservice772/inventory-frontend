@@ -1,12 +1,14 @@
-const BASE_URL = "https://dev.starserviceinventory.cloud/api";
+// const BASE_URL = "https://dev.starserviceinventory.cloud/api";
 // const BASE_URL = "http://localhost:8080";
+
+import { BASE_URL, getAuthHeaders } from "../config/apiConfig";
 
 export const getDefectiveItems = async (
   page = 0,
   size = 30,
   search = ""
 ) => {
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
 
   let url = `${BASE_URL}/defective/getAll/${page}/${size}`;
 
@@ -16,10 +18,7 @@ export const getDefectiveItems = async (
 
   const res = await fetch(url, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders()
   });
 
   const data = await res.json();
