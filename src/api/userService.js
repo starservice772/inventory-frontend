@@ -1,13 +1,12 @@
-const BASE_URL = "https://dev.starserviceinventory.cloud/api";
+// const BASE_URL = "https://dev.starserviceinventory.cloud/api";
+
+import { BASE_URL, getAuthHeaders } from "../config/apiConfig";
 
 export const createUser = async (userData) => {
-  const token = localStorage.getItem("token"); // ✅ FIX
+  //const token = localStorage.getItem("token"); // ✅ FIX
   const response = await fetch(`${BASE_URL}/users/save`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }), // ✅ safe
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(userData),
   });
 
@@ -20,34 +19,33 @@ export const createUser = async (userData) => {
 
 
 export const getUserById = async (id) => {
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    const res = await fetch(
-        `${BASE_URL}/users/getById?id=${id}`,
-        {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        }
-    );
-
-    let data = null;
-
-    try {
-        data = await res.json();
-    } catch {
-        console.log("Non-JSON response");
+  const res = await fetch(
+    `${BASE_URL}/users/getById?id=${id}`,
+    {
+      method: "GET",
+      headers: getAuthHeaders()
     }
+  );
 
-    if (!res.ok) {
-        throw new Error(data?.message || "Failed to fetch user");
-    }
+  let data = null;
 
-    // Return employee object
-    return data?.response || data;
+  try {
+    data = await res.json();
+  } catch {
+    console.log("Non-JSON response");
+  }
+
+  if (!res.ok) {
+    throw new Error(data?.message || "Failed to fetch user");
+  }
+
+  // Return employee object
+  return data?.response || data;
 };
+
+// deactiver user (now disabled)
 // export const deactivateUser = async (id) => {
 //   const token = localStorage.getItem("token");
 
@@ -75,10 +73,7 @@ export const changeUserStatus = async (id) => {
     `${BASE_URL}/users/changeStatus?id=${id}`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-         Authorization: `Bearer ${token}`
-      },
+      headers: getAuthHeaders()
     }
   );
 
@@ -89,15 +84,14 @@ export const changeUserStatus = async (id) => {
   return await response.json(); // if backend returns JSON
 };
 
+
 // ✅ GET USERS — clean fetch, no search (used on load & refresh)
 export const getUsers = async (page = 0, size = 10) => {
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
 
   const res = await fetch(`${BASE_URL}/users/getAll/${page}/${size}`, {
     method: "GET",
-    headers: {
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
+    headers: getAuthHeaders()
   });
 
   const data = await res.json();
@@ -111,15 +105,13 @@ export const getUsers = async (page = 0, size = 10) => {
 
 // 🔍 SEARCH USERS — separate API, only fired when user types in search bar
 export const searchUsers = async (page = 0, search = "") => {
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
 
   const url = `${BASE_URL}/users/getAll/${page}/10?search=${encodeURIComponent(search)}`;
 
   const res = await fetch(url, {
     method: "GET",
-    headers: {
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
+    headers: getAuthHeaders(),
   });
 
   const data = await res.json();
@@ -140,10 +132,7 @@ export const searchUsers = async (page = 0, search = "") => {
 export const updateUser = async (data) => {
   const res = await fetch(`${BASE_URL}/users/update`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getToken()}`,
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(data),
   });
 

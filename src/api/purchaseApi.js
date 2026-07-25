@@ -1,8 +1,10 @@
-const BASE_URL = "https://dev.starserviceinventory.cloud/api";
+// const BASE_URL = "https://dev.starserviceinventory.cloud/api";
 
-const getAuthHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
+// const getAuthHeaders = () => ({
+//   Authorization: `Bearer ${localStorage.getItem("token")}`,
+// });
+
+import { BASE_URL, getAuthHeaders } from "../config/apiConfig";
 
 // ✅ Save purchase
 export const savePurchase = async (payload) => {
