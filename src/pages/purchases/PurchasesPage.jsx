@@ -73,45 +73,47 @@ export default function PurchasesPage() {
     ]);
   };
 
+
+
   const updateRow = (index, field, value) => {
-    const updated = [...items];
-
-    // ✅ Step 1: update typed value
-    updated[index] = {
-      ...updated[index],
-      [field]: value,
-    };
-
-    const item = updated[index];
-
-    const rate = parseFloat(item.rateDp);
-    const qty = parseFloat(item.quantity);
-    const gstPercent = parseFloat(form.gstPercentage) / 100;
-
-    // ✅ Step 2: calculate ONLY if valid numbers
-    if (!isNaN(rate) && !isNaN(qty) && !isNaN(gstPercent)) {
-      const gstValue = rate * gstPercent * qty;
-      const totalDp = rate + rate * gstPercent;
-      const totalPrice = qty * totalDp;
+    setItems(prev => {
+      const updated = [...prev];
 
       updated[index] = {
         ...updated[index],
-        totalDp,
-        gstValue,
-        totalPrice,
+        [field]: value,
       };
-    } else {
-      // reset calculated fields if incomplete input
-      updated[index] = {
-        ...updated[index],
-        totalDp: "",
-        gstValue: "",
-        totalPrice: "",
-      };
-    }
 
-    setItems(updated);
+      const item = updated[index];
+
+      const rate = parseFloat(item.rateDp);
+      const qty = parseFloat(item.quantity);
+      const gstPercent = parseFloat(form.gstPercentage) / 100;
+
+      if (!isNaN(rate) && !isNaN(qty) && !isNaN(gstPercent)) {
+        const gstValue = rate * gstPercent * qty;
+        const totalDp = rate + rate * gstPercent;
+        const totalPrice = qty * totalDp;
+
+        updated[index] = {
+          ...updated[index],
+          totalDp,
+          gstValue,
+          totalPrice,
+        };
+      } else {
+        updated[index] = {
+          ...updated[index],
+          totalDp: "",
+          gstValue: "",
+          totalPrice: "",
+        };
+      }
+
+      return updated;
+    });
   };
+
 
   // Delete Function for Row
   const deleteRow = (index) => {
@@ -147,10 +149,16 @@ export default function PurchasesPage() {
       }
 
       if (results.length === 1) {
-        const res=results[0]
+        const res = results[0]
+        // console.log(res);
+        // console.log("itemDescription:", JSON.stringify(res.itemDescription));
+        // console.log("itemDesc:", JSON.stringify(res.itemDesc));
+        // console.log("keys:", Object.keys(res));
+
+
         updateRow(index, "itemDesc", res.itemDescription || "");
         updateRow(index, "hsnCode", res.hsnCode || "");
-        
+
         toast.success("Item description filled!");
 
         return
@@ -180,7 +188,7 @@ export default function PurchasesPage() {
       itemCode: result.itemCode || updated[index].itemCode,
       itemDesc:
         result.itemDescription || result.description || result.name || "",
-      hsnCode:  result.hsnCode || result.HSNcode || result.code || ""
+      hsnCode: result.hsnCode || result.HSNcode || result.code || ""
     };
     setItems(updated);
     setItemSearchResults((prev) => ({ ...prev, [index]: [] }));
@@ -311,11 +319,10 @@ export default function PurchasesPage() {
               Company<span className="text-red-500">*</span>
             </label>
             <input
-              className={`border p-2 w-full ${
-                touched.companyName && !form.companyName
-                  ? "border-red-500"
-                  : "border-gray-300"
-              }`}
+              className={`border p-2 w-full ${touched.companyName && !form.companyName
+                ? "border-red-500"
+                : "border-gray-300"
+                }`}
               value={form.companyName}
               onChange={(e) =>
                 setForm({ ...form, companyName: e.target.value })
@@ -338,11 +345,10 @@ export default function PurchasesPage() {
           <div>
             <label className="text-sm font-medium">Type</label>
             <select
-              className={`border p-2 w-full ${
-                touched.invoiceType && !form.invoiceType
-                  ? "border-red-500"
-                  : "border-gray-300"
-              }`}
+              className={`border p-2 w-full ${touched.invoiceType && !form.invoiceType
+                ? "border-red-500"
+                : "border-gray-300"
+                }`}
               value={form.invoiceType}
               onChange={(e) =>
                 setForm({
@@ -367,11 +373,10 @@ export default function PurchasesPage() {
               <span className="text-red-500">*</span>
             </label>
             <input
-              className={`border p-2 w-full ${
-                touched.invoiceNo && !form.invoiceNo
-                  ? "border-red-500"
-                  : "border-gray-300"
-              }`}
+              className={`border p-2 w-full ${touched.invoiceNo && !form.invoiceNo
+                ? "border-red-500"
+                : "border-gray-300"
+                }`}
               value={form.invoiceNo}
               onChange={(e) => setForm({ ...form, invoiceNo: e.target.value })}
               onBlur={() => setTouched({ ...touched, invoiceNo: true })}
@@ -386,11 +391,10 @@ export default function PurchasesPage() {
             </label>
             <input
               type="date"
-              className={`border p-2 w-full ${
-                touched.invoiceDate && !form.invoiceDate
-                  ? "border-red-500"
-                  : "border-gray-300"
-              }`}
+              className={`border p-2 w-full ${touched.invoiceDate && !form.invoiceDate
+                ? "border-red-500"
+                : "border-gray-300"
+                }`}
               value={form.invoiceDate}
               onChange={(e) =>
                 setForm({ ...form, invoiceDate: e.target.value })
@@ -403,11 +407,10 @@ export default function PurchasesPage() {
           <div>
             <label className="text-sm font-medium">GST (in %)</label>
             <input
-              className={`border p-2 w-full ${
-                touched.gstPercentage && !form.gstPercentage
-                  ? "border-red-500"
-                  : "border-gray-300"
-              }`}
+              className={`border p-2 w-full ${touched.gstPercentage && !form.gstPercentage
+                ? "border-red-500"
+                : "border-gray-300"
+                }`}
               value={form.gstPercentage}
               onChange={(e) =>
                 setForm({ ...form, gstPercentage: e.target.value })
@@ -451,11 +454,10 @@ export default function PurchasesPage() {
                   <td className="border border-gray-300 p-1 relative">
                     <div className="flex items-center gap-1">
                       <input
-                        className={`flex-1 p-1 outline-none text-center min-w-0 ${
-                          touched.itemCode && !item.itemCode
-                            ? "border border-red-500"
-                            : ""
-                        }`}
+                        className={`flex-1 p-1 outline-none text-center min-w-0 ${touched.itemCode && !item.itemCode
+                          ? "border border-red-500"
+                          : ""
+                          }`}
                         value={item.itemCode || ""}
                         onChange={(e) =>
                           updateRow(index, "itemCode", e.target.value)
@@ -489,11 +491,10 @@ export default function PurchasesPage() {
                       {/* Input */}
                       <input
                         readOnly
-                        className={`w-full p-1 outline-none text-left bg-gray-50 cursor-default ${
-                          touched.itemDesc && !item.itemDesc
-                            ? "border border-red-500"
-                            : ""
-                        }`}
+                        className={`w-full p-1 outline-none text-left bg-gray-50 cursor-default ${touched.itemDesc && !item.itemDesc
+                          ? "border border-red-500"
+                          : ""
+                          }`}
                         value={item.itemDesc || ""}
                         onBlur={() =>
                           setTouched({ ...touched, itemDesc: true })
@@ -536,12 +537,11 @@ export default function PurchasesPage() {
                   {/* HSN */}
                   <td className="border border-gray-300 p-1">
                     <input
-                    readOnly
-                      className={`w-full p-1 outline-none text-center ${
-                        touched.hsnCode && !item.hsnCode
-                          ? "border border-red-500"
-                          : ""
-                      }`}
+                      readOnly
+                      className={`w-full p-1 outline-none text-center ${touched.hsnCode && !item.hsnCode
+                        ? "border border-red-500"
+                        : ""
+                        }`}
                       value={item.hsnCode || ""}
                       onChange={(e) =>
                         updateRow(index, "hsnCode", e.target.value)
@@ -555,11 +555,10 @@ export default function PurchasesPage() {
                   <td className="border border-gray-300 p-1">
                     <input
                       type="number"
-                      className={`w-full p-1 outline-none text-right ${
-                        touched.rateDp && !item.rateDp
-                          ? "border border-red-500"
-                          : ""
-                      }`}
+                      className={`w-full p-1 outline-none text-right ${touched.rateDp && !item.rateDp
+                        ? "border border-red-500"
+                        : ""
+                        }`}
                       value={item.rateDp || ""}
                       onChange={(e) =>
                         updateRow(index, "rateDp", e.target.value)
@@ -572,11 +571,10 @@ export default function PurchasesPage() {
                   <td className="border border-gray-300 p-1">
                     <input
                       type="number"
-                      className={`w-full p-1 outline-none text-right ${
-                        touched.quantity && !item.quantity
-                          ? "border border-red-500"
-                          : ""
-                      }`}
+                      className={`w-full p-1 outline-none text-right ${touched.quantity && !item.quantity
+                        ? "border border-red-500"
+                        : ""
+                        }`}
                       value={item.quantity || ""}
                       onChange={(e) =>
                         updateRow(index, "quantity", e.target.value)
@@ -688,19 +686,19 @@ export default function PurchasesPage() {
               left:
                 typeof window !== "undefined"
                   ? Math.max(
-                      16 + window.scrollX,
+                    16 + window.scrollX,
+                    Math.min(
+                      dropdownPos.left,
+                      window.scrollX +
+                      window.innerWidth -
                       Math.min(
-                        dropdownPos.left,
-                        window.scrollX +
-                          window.innerWidth -
-                          Math.min(
-                            Math.max(dropdownPos.width + 180, 340),
-                            420,
-                            window.innerWidth - 32,
-                          ) -
-                          16,
-                      ),
-                    )
+                        Math.max(dropdownPos.width + 180, 340),
+                        420,
+                        window.innerWidth - 32,
+                      ) -
+                      16,
+                    ),
+                  )
                   : dropdownPos.left,
               width: Math.max(dropdownPos.width + 180, 340),
               maxWidth: "min(420px, calc(100vw - 32px))",

@@ -1,7 +1,8 @@
 import axios from "axios";
+import { BASE_URL, getAuthHeaders } from "../config/apiConfig";
 
-const BASE_URL = "https://dev.starserviceinventory.cloud/api";
-const token = localStorage.getItem("token");
+// const BASE_URL = "https://dev.starserviceinventory.cloud/api";
+// const token = localStorage.getItem("token");
 
 export const getStockByItemCode = async (itemCode) => {
 
@@ -9,9 +10,7 @@ export const getStockByItemCode = async (itemCode) => {
     `${BASE_URL}/stock/byItemCode`,
     {
       params: { itemCode },
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: getAuthHeaders()
     }
   );
 

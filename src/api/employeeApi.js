@@ -1,4 +1,6 @@
-const BASE_URL = "https://dev.starserviceinventory.cloud/api";
+// const BASE_URL = "https://dev.starserviceinventory.cloud/api";
+
+import { BASE_URL, getAuthHeaders } from "../config/apiConfig";
 
 // GET ALL EMPLOYEE DETAILS
 export const getEmployees = async (page = 0) => {
@@ -9,10 +11,7 @@ export const getEmployees = async (page = 0) => {
             `${BASE_URL}/employee/getAll/${page}/10`,
             {
                 method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: getAuthHeaders()
             }
         );
 
@@ -48,10 +47,7 @@ export const createEmployee = async (payload) => {
 
     const res = await fetch(`${BASE_URL}/employee/save`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload),
     });
 
@@ -75,10 +71,7 @@ export const getEmployeeById = async (id) => {
         `${BASE_URL}/employee/getById?id=${id}`,
         {
             method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
+            headers: getAuthHeaders()
         }
     );
 
@@ -107,9 +100,7 @@ export const toggleEmployeeStatus = async (emp) => {
 
     const res = await fetch(url, {
         method: "POST",
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders()
     });
 
     let data = null;
@@ -133,10 +124,7 @@ export const updateEmployee = async (emp) => {
 
     const res = await fetch(url, {
         method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(emp),
     });
 
@@ -160,9 +148,7 @@ export const deleteEmployee = async (id) => {
     const res = await fetch(`${BASE_URL}/employee/delete?id=${id}`,
         {
             method: "POST",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+            headers: getAuthHeaders()
         }
     );
 
@@ -181,9 +167,7 @@ export const searchEmployees = async (page, search = "") => {
 
     const res = await fetch(url, {
         method: "GET",
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders()
     });
 
     const data = await res.json();
