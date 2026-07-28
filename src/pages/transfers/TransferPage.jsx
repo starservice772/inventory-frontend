@@ -3,14 +3,14 @@ import { createPortal } from "react-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { searchItemByCode } from "../../api/purchaseApi";
-import { Search } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
+import { getAuthHeaders, BASE_URL } from "../../config/apiConfig";
 
-const token = localStorage.getItem("token");
-const BASE_URL = "https://dev.starserviceinventory.cloud/api";
+// const token = localStorage.getItem("token");
+// const BASE_URL = "https://dev.starserviceinventory.cloud/api";
 
 export default function TransferPage() {
   const [itemResults, setItemResults] = useState([]);
-  const [showItemDropdown, setShowItemDropdown] = useState(false);
   const [itemSearchLoading, setItemSearchLoading] = useState(false);
   const [tooltip, setTooltip] = useState({
     visible: false,
@@ -19,63 +19,137 @@ export default function TransferPage() {
     y: 0,
   });
 
+  const [showItemDropdown, setShowItemDropdown] = useState(false);
+  const [activeRow, setActiveRow] = useState(null);
+
   //console.log(token);
 
   const [form, setForm] = useState({
     empId: "",
     empName: "",
-    itemCode: "",
-    itemDesc: "",
-    hsnCode: "",
-    quantity: "",
     type: "ISSUE",
   });
 
+  const [items, setItems] = useState([
+    {
+      itemCode: "",
+      itemDesc: "",
+      hsnCode: "",
+      quantity: "",
+      type: "ISSUE",
+    },
+  ]);
+
+  // ✅ Add new row
+  const addRow = () => {
+    setItems((prev) => [
+      ...prev,
+      {
+        itemCode: "",
+        itemDesc: "",
+        hsnCode: "",
+        quantity: "",
+        type: form.type,
+      },
+    ]);
+  };
+
+  const deleteRow = (index) => {
+    if (items.length === 1) {
+      toast.error("At least one row is required");
+      return;
+    }
+
+    setItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateItem = (index, field, value) => {
+    setItems((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      )
+    );
+  };
+
   const [employees, setEmployees] = useState([]);
 
-  // Search employee while typing
   useEffect(() => {
+    // Employee already selected, don't search again
+    if (form.empId) {
+      return;
+    }
+
     if (form.empName.trim().length < 2) {
       setEmployees([]);
       return;
     }
 
-    const fetchEmployees = async () => {
+    const timer = setTimeout(async () => {
       try {
         const res = await axios.get(
-          `${BASE_URL}/employee/list?search=${form.empName}`,
+          `${BASE_URL}/employee/list?search=${encodeURIComponent(form.empName)}`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
+            headers: getAuthHeaders(),
+          }
         );
 
         if (res.data.success) {
           setEmployees(res.data.data);
+        } else {
+          setEmployees([]);
         }
       } catch (err) {
         console.error(err);
       }
-    };
-
-    const timer = setTimeout(fetchEmployees, 300);
+    }, 300);
 
     return () => clearTimeout(timer);
-  }, [form.empName]);
+  }, [form.empName, form.empId]);
 
-  const handleItemCodeSearch = async () => {
-    if (!form.itemCode.trim()) return;
 
+  // const handleItemCodeSearch = async () => {
+  //   if (!items.itemCode.trim()) return;
+
+  //   setItemSearchLoading(true);
+
+  //   try {
+  //     const items = await searchItemByCode(items.itemCode);
+
+  //     console.log(items);
+
+  //     setItemResults(items);
+  //     setShowItemDropdown(items.length > 0);
+  //   } catch (err) {
+  //     console.error(err);
+  //     setItemResults([]);
+  //     setShowItemDropdown(false);
+  //   } finally {
+  //     setItemSearchLoading(false);
+  //   }
+  // };
+
+  const handleItemCodeSearch = async (index) => {
+    const row = items[index];
+
+    if (!row) return;
+
+    const code = row.itemCode.trim();
+
+    if (!code) {
+      toast.error("Please enter Item Code");
+      return;
+    }
+
+    setActiveRow(index);
     setItemSearchLoading(true);
 
     try {
-      const items = await searchItemByCode(form.itemCode);
+      const result = await searchItemByCode(code);
 
-      console.log(items);
+      console.log("Returned value:", result);
 
-      setItemResults(items);
-      setShowItemDropdown(items.length > 0);
+      setItemResults(result);
+      setShowItemDropdown(result.length > 0);
     } catch (err) {
       console.error(err);
       setItemResults([]);
@@ -98,15 +172,23 @@ export default function TransferPage() {
   //     setItemResults([]);
   //   }
   // };
-  const selectItem = (item) => {
-    setForm((prev) => ({
-      ...prev,
-      itemCode: item.itemCode,
-      itemDesc: item.itemDescription,
-    }));
+  const selectItem = (index, item) => {
+    setItems((prev) =>
+      prev.map((row, i) =>
+        i === index
+          ? {
+            ...row,
+            itemCode: item.itemCode,
+            itemDesc: item.itemDescription,
+            hsnCode: item.hsnCode,
+          }
+          : row
+      )
+    );
 
     setShowItemDropdown(false);
     setItemResults([]);
+    setActiveRow(null);
   };
 
   const handleTransfer = async () => {
@@ -114,73 +196,50 @@ export default function TransferPage() {
       let empId = form.empId;
       let empName = form.empName;
 
-      // If user typed the name manually, fetch employee id
-      if (!empId && empName.trim()) {
-        const empRes = await axios.get(
-          `${BASE_URL}/employee/list?search=${encodeURIComponent(empName)}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        if (
-          empRes.data.success &&
-          empRes.data.data &&
-          empRes.data.data.length > 0
-        ) {
-          const employee = empRes.data.data.find(
-            (e) => e.empName.toLowerCase() === empName.toLowerCase(),
-          );
-
-          if (!employee) {
-            toast.error("Employee not found");
-            return;
-          }
-
-          empId = employee.empId;
-          empName = employee.empName;
-        } else {
-          toast.error("Employee not found");
-          return;
-        }
+      if (!form.empId) {
+        toast.error("Please select an engineer");
+        return;
       }
 
       const payload = {
         empId,
         empName,
-        items: [
-          {
-            itemCode: form.itemCode,
-            itemDesc: form.itemDesc,
-            quantiy: form.quantity,
-            type: form.type,
-          },
-        ],
+        items: items.map((item) => ({
+          itemCode: item.itemCode,
+          itemDesc: item.itemDesc,
+          quantiy: item.quantity,
+          type: item.type,
+        }))
       };
 
-      const token = localStorage.getItem("token");
+      // const token = localStorage.getItem("token");
 
       const res = await axios.post(`${BASE_URL}/stock/transfer`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders()
       });
 
       toast.success(res.data.message || "Transfer Successful");
 
+      // Reset header form
       setForm({
         empId: "",
         empName: "",
-        itemCode: "",
-        itemDesc: "",
-        hsnCode: "",
-        quantity: "",
         type: "ISSUE",
       });
 
+      // Reset table
+      setItems([
+        {
+          itemCode: "",
+          itemDesc: "",
+          hsnCode: "",
+          quantity: "",
+          type: "ISSUE",
+        },
+      ]);
+
       setEmployees([]);
+
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || "Transfer Failed");
@@ -196,15 +255,18 @@ export default function TransferPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
-        {/* Employee Search */}
-        <div className="relative">
-          <label className="block mb-1 text-sm font-semibold text-slate-700 mb-1">
-            Engineer Name
+      {/* Engineer Name & Issue Type (Outside Table) */}
+      <div className="grid grid-cols-2 gap-6 mb-6">
+
+        {/* Engineer */}
+        <div className="relative overflow-visible">
+          <label className="block text-sm font-medium mb-2">
+            Engineer Name <span className="text-red-500">*</span>
           </label>
+
           <input
-            className="border p-3 w-full"
-            placeholder="Engineer Name"
+            className="w-full h-11 border px-3"
+            placeholder="Enter engineer name"
             value={form.empName}
             onChange={(e) =>
               setForm({
@@ -216,19 +278,20 @@ export default function TransferPage() {
           />
 
           {employees.length > 0 && (
-            <div className="absolute z-20 bg-white border w-full mt-1 max-h-52 overflow-auto shadow-lg">
+            <div className="absolute left-0 right-0 mt-1 bg-white border shadow-lg z-50 max-h-52 overflow-y-auto">
               {employees.map((emp) => (
                 <div
                   key={emp.empId}
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
                     setForm({
                       ...form,
-                      empId: emp.empId,
                       empName: emp.empName,
+                      empId: emp.empId,
                     });
+
                     setEmployees([]);
                   }}
+                  className="px-3 py-2 hover:bg-slate-100 cursor-pointer"
                 >
                   {emp.empName}
                 </div>
@@ -237,249 +300,272 @@ export default function TransferPage() {
           )}
         </div>
 
-        <div className="relative w-full overflow-visible">
-          <label className="block mb-1 text-sm font-semibold text-slate-700 mb-1">
-            Item Code
-          </label>
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Item Code"
-              className="w-full border p-3 pr-10"
-              value={form.itemCode}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  itemCode: e.target.value,
-                }))
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleItemCodeSearch();
-                }
-              }}
-            />
-
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleItemCodeSearch();
-              }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-slate-500 hover:text-blue-600"
-            >
-              {itemSearchLoading ? (
-                <span className="animate-spin">⏳</span>
-              ) : (
-                <Search size={18} />
-              )}
-            </button>
-          </div>
-
-          {/* dropdown code */}
-          {/* <div className="text-red-500 text-sm">
-            showItemDropdown : {String(showItemDropdown)}
-            <br />
-            Total Results : {itemResults.length}
-          </div> */}
-          {showItemDropdown && (
-            <div
-              className="absolute left-0 top-full mt-2 w-[400px]
-              bg-white rounded-xl overflow-hidden border border-slate-200
-              shadow-[0_10px_30px_rgba(0,0,0,0.12),0_2px_10px_rgba(0,0,0,0.08)]
-              z-[9999]"
-            >
-              {/* Header */}
-              <div className="bg-slate-800 flex items-center justify-between px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-white font-semibold">
-                    Search Results
-                  </span>
-
-                  <span className="bg-slate-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                    {itemResults.length}
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShowItemDropdown(false)}
-                  className="text-slate-300 hover:text-white text-xl leading-none"
-                >
-                  ×
-                </button>
-              </div>
-
-              {/* Subtitle */}
-              <div className="px-4 py-2 bg-gray-50 border-b text-sm text-gray-400">
-                Click an item to auto-fill the row
-              </div>
-
-              {/* Results */}
-              <div className="max-h-72 overflow-y-auto">
-                {itemResults.map((item, index) => (
-                  <button
-                    key={item.itemCode}
-                    type="button"
-                    onClick={() => {
-                      setForm((prev) => ({
-                        ...prev,
-                        itemCode: item.itemCode,
-                        itemDesc: item.itemDescription,
-                        hsnCode: item.hsnCode,
-                      }));
-
-                      setShowItemDropdown(false);
-                    }}
-                    className="w-full text-left flex gap-3 px-4 py-4 border-b last:border-b-0
-          hover:bg-blue-50 transition"
-                  >
-                    {/* Number Badge */}
-                    <div
-                      className="flex items-center justify-center
-            w-8 h-8 rounded-full
-            bg-slate-100 text-slate-500
-            font-semibold text-sm flex-shrink-0"
-                    >
-                      {index + 1}
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-slate-800 break-words">
-                        {item.itemDescription}
-                      </div>
-
-                      <div className="text-xs text-slate-400 font-mono mt-1 break-all">
-                        Item code: {item.itemCode}
-                      </div>
-
-                      <div className="text-xs text-slate-400 font-mono mt-1 break-all">
-                        HSN code: {item.hsnCode}
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="relative">
-          <label className="block mb-1 text-sm font-semibold text-slate-700 mb-1">
-            Item Description
-          </label>
-          <input
-            readOnly
-            className="border p-3 pr-12 w-full"
-            placeholder="Item Description"
-            value={form.itemDesc}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                itemDesc: e.target.value,
-              })
-            }
-          />
-
-          {form.itemDesc?.length > 20 && (
-            <span
-              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer font-bold text-gray-500"
-              onMouseEnter={(e) =>
-                setTooltip({
-                  visible: true,
-                  text: form.itemDesc,
-                  x: e.clientX,
-                  y: e.clientY,
-                })
-              }
-              onMouseMove={(e) =>
-                setTooltip((prev) => ({
-                  ...prev,
-                  x: e.clientX,
-                  y: e.clientY,
-                }))
-              }
-              onMouseLeave={() =>
-                setTooltip({
-                  visible: false,
-                  text: "",
-                  x: 0,
-                  y: 0,
-                })
-              }
-            >
-              ...
-            </span>
-          )}
-        </div>
-
+        {/* Issue Type */}
         <div>
-          <label className="block mb-1 text-sm font-semibold text-slate-700 mb-1">
-            HSN Code
+          <label className="block text-sm font-medium mb-2">
+            Issue Type
           </label>
-          <input
-            className="border p-3"
-            placeholder="HSN Code"
-            value={form.hsnCode}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                hsnCode: e.target.value,
-              })
-            }
-          />
-        </div>
 
-        <div>
-          <label className="block mb-1 text-sm font-semibold text-slate-700 mb-1">
-            Issue / Return Qty
-          </label>
-          <input
-            type="number"
-            className="border p-3"
-            placeholder="Issue / Return Qty"
-            value={form.quantity}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                quantity: e.target.value,
-              })
-            }
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1">
-            Transfer Type
-          </label>
           <select
-            className="border p-3"
+            className="w-full h-11 border px-3"
             value={form.type}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                type: e.target.value,
-              })
-            }
+            onChange={(e) => {
+              const value = e.target.value;
+
+              setForm((prev) => ({
+                ...prev,
+                type: value,
+              }));
+
+              setItems((prev) =>
+                prev.map((item) => ({
+                  ...item,
+                  type: value,
+                }))
+              );
+            }}
           >
             <option value="ISSUE">Issue</option>
             <option value="RETURN">Return</option>
             <option value="DEFECTIVE_RETURN">Defective Return</option>
           </select>
         </div>
+
       </div>
 
-      <button
-        onClick={handleTransfer}
-        className="bg-purple-600 text-white px-4 py-3
-             transition-all duration-300 ease-in-out
-             hover:bg-purple-700 hover:opacity-90 hover:shadow-lg
+
+      {/* ================= TABLE ================= */}
+
+      <div className="border border-gray-300">
+
+        <table className="w-full border-collapse">
+
+          <thead className="bg-slate-100">
+
+            <tr>
+
+              <th className="border text-center py-4 w-[20%]">
+                Item Code <span className="text-red-500">*</span>
+              </th>
+
+              <th className="border text-center py-4 w-[25%]">
+                Item Description <span className="text-red-500">*</span>
+              </th>
+
+              <th className="border text-center py-4 w-[18%]">
+                HSN Code <span className="text-red-500">*</span>
+              </th>
+
+              <th className="border text-center py-4 w-[18%]">
+                Issue / Return Qty <span className="text-red-500">*</span>
+              </th>
+
+              <th className="border w-20"></th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {items.map((item, index) => (
+
+              <tr key={index}>
+
+                {/* Item Code */}
+
+                <td className="border p-0 relative">
+
+                  <input
+                    className="w-full h-12 px-3 pr-10 outline-none"
+                    value={item.itemCode}
+                    onChange={(e) =>
+                      updateItem(index, "itemCode", e.target.value)
+                    }
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => handleItemCodeSearch(index)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-blue-600"
+                  >
+                    {itemSearchLoading ? (
+                      <span className="inline-block w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></span>
+                    ) : (
+                      <Search size={17} />
+                    )}
+                  </button>
+
+                  {/* dropdown */}
+                  {showItemDropdown &&
+                    activeRow === index &&
+                    itemResults.length > 0 && (
+
+                      <div className="absolute left-0 top-full mt-2 w-[400px] bg-white rounded-xl shadow-2xl border overflow-hidden z-[99999]">
+
+                        {/* Header */}
+                        <div className="flex items-center justify-between bg-slate-700 text-white px-4 py-2">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-base">
+                              Search Results
+                            </span>
+
+                            <span className="bg-slate-500 px-2 py-0.5 rounded-full text-xs font-semibold">
+                              {itemResults.length}
+                            </span>
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              setShowItemDropdown(false);
+                              setActiveRow(null);
+                            }}
+                            className="text-lg hover:text-red-300"
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        {/* Subtitle */}
+                        <div className="px-4 py-2 text-xs text-slate-500 border-b">
+                          Click an item to auto-fill the row
+                        </div>
+
+                        {/* Items */}
+                        <div className="max-h-[260px] overflow-y-auto">
+
+                          {itemResults.map((result, idx) => (
+
+                            <div
+                              key={result.itemCode}
+                              onClick={() => selectItem(activeRow, result)}
+                              className="flex gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 border-b transition"
+                            >
+
+                              {/* Number Circle */}
+                              <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-600 flex-shrink-0">
+                                {idx + 1}
+                              </div>
+
+                              {/* Details */}
+                              <div className="flex-1">
+
+                                <div className="font-semibold text-[15px] text-slate-800 leading-5">
+                                  {result.itemDescription}
+                                </div>
+
+                                <div className="mt-1 text-xs text-slate-500">
+                                  <span className="font-medium">Item Code:</span>{" "}
+                                  {result.itemCode}
+                                </div>
+
+                                <div className="text-xs text-slate-500">
+                                  <span className="font-medium">HSN Code:</span>{" "}
+                                  {result.hsnCode}
+                                </div>
+
+                              </div>
+
+                            </div>
+
+                          ))}
+
+                        </div>
+
+                      </div>
+
+                    )}
+
+                </td>
+
+                {/* Description */}
+
+                <td className="border p-0">
+
+                  <input
+                    readOnly
+                    value={item.itemDesc}
+                    className="w-full h-12 px-3 bg-white outline-none"
+                  />
+
+                </td>
+
+                {/* HSN */}
+
+                <td className="border p-0">
+
+                  <input
+                    readOnly
+                    value={item.hsnCode}
+                    className="w-full h-12 px-3 bg-white outline-none"
+                  />
+
+                </td>
+
+                {/* Qty */}
+
+                <td className="border p-0">
+
+                  <input
+                    type="number"
+                    value={item.quantity}
+                    onChange={(e) =>
+                      updateItem(index, "quantity", e.target.value)
+                    }
+                    className="w-full h-12 px-3 outline-none"
+                  />
+
+                </td>
+
+                {/* Delete */}
+
+                <td className="border text-center">
+
+                  <button
+                    type="button"
+                    onClick={() => deleteRow(index)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+
+                </td>
+
+              </tr>
+
+            ))}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      {/* Buttons */}
+
+      <div className="flex justify-end gap-3 mt-6">
+
+        <button
+          onClick={addRow}
+          className="bg-slate-800 hover:bg-slate-900 text-white px-7 py-3"
+        >
+          Add
+        </button>
+
+
+        <button
+          onClick={handleTransfer}
+          className="bg-green-600 text-white px-4 py-3 
+             transition-all duration-300 
+             hover:bg-green-700 hover:shadow-lg hover:-translate-y-1 
              active:scale-95"
-      >
-        Transfer Stock
-      </button>
+        >
+          Transfer Stock
+        </button>
+
+      </div>
+
 
       {tooltip.visible &&
         createPortal(
