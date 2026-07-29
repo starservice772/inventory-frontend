@@ -50,8 +50,8 @@ export default function PurchasesPage() {
       hsnCode: "",
       rateDp: "",
       quantity: "",
-      gstValue: "",
-      totalDp: "",
+      // gstValue: "",
+      // totalDp: "",
       totalPrice: "",
     },
   ]);
@@ -102,8 +102,8 @@ export default function PurchasesPage() {
         hsnCode: "",
         rateDp: "",
         quantity: "",
-        gstValue: "",
-        totalDp: "",
+        // gstValue: "",
+        // totalDp: "",
         totalPrice: "",
       },
     ]);
@@ -122,24 +122,26 @@ export default function PurchasesPage() {
 
       const rate = parseFloat(item.rateDp);
       const qty = parseFloat(item.quantity);
-      const gstPercent = parseFloat(form.gstPercentage) / 100;
+      // const gstPercent = parseFloat(form.gstPercentage) / 100;
 
-      if (!isNaN(rate) && !isNaN(qty) && !isNaN(gstPercent)) {
-        const gstValue = rate * gstPercent * qty;
-        const totalDp = rate + rate * gstPercent;
-        const totalPrice = qty * totalDp;
+      // if (!isNaN(rate) && !isNaN(qty) && !isNaN(gstPercent)) {
+      if (!isNaN(rate) && !isNaN(qty)) {
+        // const gstValue = rate * gstPercent * qty;
+        // const totalDp = rate + rate * gstPercent;
+        // const totalDp = rate * qty;
+        const totalPrice = rate * qty;
 
         updated[index] = {
           ...updated[index],
-          totalDp,
-          gstValue,
+          // totalDp,
+          // gstValue,
           totalPrice,
         };
       } else {
         updated[index] = {
           ...updated[index],
-          totalDp: "",
-          gstValue: "",
+          // totalDp: "",
+          // gstValue: "",
           totalPrice: "",
         };
       }
@@ -231,68 +233,68 @@ export default function PurchasesPage() {
 
 
   const validateForm = () => {
-  // Mark all required fields as touched
-  setTouched({
-    empName: true,
-    workNo: true,
-    invoiceNo: true,
-    invoiceDate: true,
-    gstPercentage: true,
+    // Mark all required fields as touched
+    setTouched({
+      empName: true,
+      workNo: true,
+      invoiceNo: true,
+      invoiceDate: true,
+      gstPercentage: true,
 
-    itemCode: true,
-    itemDesc: true,
-    hsnCode: true,
-    rateDp: true,
-    quantity: true,
-  });
+      itemCode: true,
+      itemDesc: true,
+      hsnCode: true,
+      rateDp: true,
+      quantity: true,
+    });
 
-  // Header validation
-  if (
-    !form.empName.trim() ||
-    !form.workNo.trim() ||
-    !form.invoiceNo.trim() ||
-    !form.invoiceDate ||
-    !form.gstPercentage
-  ) {
-    toast.error("Please fill all required fields.");
-    return false;
-  }
-
-  // Employee must be selected
-  if (!selectedEmployee) {
-    toast.error("Please select an engineer.");
-    return false;
-  }
-
-  // Table validation
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-
+    // Header validation
     if (
-      !item.itemCode ||
-      !item.itemDesc ||
-      !item.hsnCode ||
-      !item.rateDp ||
-      !item.quantity
+      !form.empName.trim() ||
+      !form.workNo.trim() ||
+      !form.invoiceNo.trim() ||
+      !form.invoiceDate
+      // !form.gstPercentage
     ) {
-      toast.error(`Please complete Item Row ${i + 1}`);
+      toast.error("Please fill all required fields.");
       return false;
     }
 
-    if (Number(item.rateDp) <= 0) {
-      toast.error(`Rate must be greater than 0 (Row ${i + 1})`);
+    // Employee must be selected
+    if (!selectedEmployee) {
+      toast.error("Please select an engineer.");
       return false;
     }
 
-    if (Number(item.quantity) <= 0) {
-      toast.error(`Quantity must be greater than 0 (Row ${i + 1})`);
-      return false;
-    }
-  }
+    // Table validation
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
 
-  return true;
-};
-  
+      if (
+        !item.itemCode ||
+        !item.itemDesc ||
+        !item.hsnCode ||
+        !item.rateDp ||
+        !item.quantity
+      ) {
+        toast.error(`Please complete Item Row ${i + 1}`);
+        return false;
+      }
+
+      if (Number(item.rateDp) <= 0) {
+        toast.error(`Rate must be greater than 0 (Row ${i + 1})`);
+        return false;
+      }
+
+      if (Number(item.quantity) <= 0) {
+        toast.error(`Quantity must be greater than 0 (Row ${i + 1})`);
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const handleSaveSale = async () => {
     if (!validateForm()) return;
     try {
@@ -311,9 +313,9 @@ export default function PurchasesPage() {
 
         items: items.map((item) => ({
           itemCode: item.itemCode,
-          
+
           itemDesc: item.itemDesc,
-         
+
           quantity: item.quantity,
 
           hsnCode: item.hsnCode,
@@ -499,7 +501,7 @@ export default function PurchasesPage() {
           </div>
 
           {/* GST % */}
-          <div>
+          {/* <div>
             <label className="text-sm font-medium">GST (in %)</label>
             <input
               className={`border p-2 w-full ${touched.gstPercentage && !form.gstPercentage
@@ -512,7 +514,7 @@ export default function PurchasesPage() {
               }
               onBlur={() => setTouched({ ...touched, gstPercentage: true })}
             />
-          </div>
+          </div> */}
         </div>
 
         {/* ✅ Table */}
@@ -526,8 +528,8 @@ export default function PurchasesPage() {
                   "HSN Code",
                   "Rate",
                   "Quantity",
-                  "GST Value",
-                  "Total DP",
+                  // "GST Value",
+                  // "Total DP",
                   "Total Price",
                   "    ",
                 ].map((head, index) => (
@@ -679,22 +681,22 @@ export default function PurchasesPage() {
                   </td>
 
                   {/* GST Value (auto) */}
-                  <td className="border border-gray-300 p-1">
+                  {/* <td className="border border-gray-300 p-1">
                     <input
                       className="w-full p-1 outline-none text-right"
                       value={item.gstValue || 0}
                       readOnly
                     />
-                  </td>
+                  </td> */}
 
                   {/* Total DP */}
-                  <td className="border border-gray-300 p-1">
+                  {/* <td className="border border-gray-300 p-1">
                     <input
                       className="w-full p-1 outline-none text-right"
                       value={item.totalDp || 0}
                       readOnly
                     />
-                  </td>
+                  </td> */}
 
                   {/* Total Price */}
                   <td className="border border-gray-300 p-1">
