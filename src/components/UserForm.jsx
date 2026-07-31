@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-// import { createUser } from "../api/userService";
-
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 
-const BASE_URL = "https://dev.starserviceinventory.cloud/api";
+import { BASE_URL, getAuthHeaders } from "../config/apiConfig";
+
+// const BASE_URL = "https://dev.starserviceinventory.cloud/api";
 
 const getDefaultCompany = () => {
   try {
@@ -130,14 +130,11 @@ function UserForm({ user, onSuccess }) {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      // const token = localStorage.getItem("token");
 
       const res = await fetch(`${BASE_URL}/users/save`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(formData),
       });
 
