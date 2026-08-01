@@ -13,7 +13,7 @@ export const getDefectiveItems = async (
   let url = `${BASE_URL}/defective/getAll/${page}/${size}`;
 
   if (search.trim().length >= 3) {
-    url += `?search=${encodeURIComponent(search.trim())}`;
+    url += `?searchKey=${encodeURIComponent(search.trim())}`;
   }
 
   const res = await fetch(url, {
@@ -32,4 +32,28 @@ export const getDefectiveItems = async (
     totalPages: data.totalPages || 0,
     totalRecords: data.totalRecords || 0,
   };
+};
+
+export const transferDefectiveToCompany = async (payload) => {
+  const res = await fetch(
+    `${BASE_URL}/defective/transfer/toCompany`,
+    {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      data?.message || "Failed to transfer defective items"
+    );
+  }
+
+  return data;
 };
