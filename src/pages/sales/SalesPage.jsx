@@ -251,7 +251,7 @@ export default function PurchasesPage() {
     // Header validation
     if (
       !form.empName.trim() ||
-      !form.workNo.trim() ||
+      // !form.workNo.trim() ||
       !form.invoiceNo.trim() ||
       !form.invoiceDate
       // !form.gstPercentage
@@ -448,7 +448,8 @@ export default function PurchasesPage() {
 
           {/* Work Order No */}
           <div>
-            <label className="text-sm font-medium">Work Order No.</label><span className="text-red-500">*</span>
+            <label className="text-sm font-medium">Work Order No.</label>
+            {/* <span className="text-red-500">*</span> */}
             <input
               className={`border p-2 w-full ${touched.workNo && !form.workNo
                 ? "border-red-500"
