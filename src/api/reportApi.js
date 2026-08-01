@@ -1,5 +1,6 @@
 import { BASE_URL, getAuthHeaders } from "../config/apiConfig";
 
+
 const downloadExcel = async (url, fileName) => {
     const response = await fetch(url, {
         method: "GET",
@@ -25,11 +26,13 @@ const downloadExcel = async (url, fileName) => {
     window.URL.revokeObjectURL(downloadUrl);
 };
 
+const today = new Date().toISOString().split("T")[0];
+
 // Office Stock
 export const downloadOfficeStockReport = async () => {
     await downloadExcel(
         `${BASE_URL}/report/officeStock/download`,
-        "Office_Stock_Report.xlsx"
+        `Office_Stock_Report_${today}.xlsx`
     );
 };
 
@@ -37,7 +40,7 @@ export const downloadOfficeStockReport = async () => {
 export const downloadEmployeeStockReport = async () => {
     await downloadExcel(
         `${BASE_URL}/report/employeeStock/download`,
-        "Employee_Stock_Report.xlsx"
+        `Employee_Stock_Report_${today}.xlsx`
     );
 };
 
@@ -45,7 +48,7 @@ export const downloadEmployeeStockReport = async () => {
 export const downloadDefectiveStockReport = async () => {
     await downloadExcel(
         `${BASE_URL}/report/defectiveStock/download`,
-        "Defective_Stock_Report.xlsx"
+        `Defective_Stock_Report_${today}.xlsx`
     );
 };
 

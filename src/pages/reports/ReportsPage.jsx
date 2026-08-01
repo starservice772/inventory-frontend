@@ -29,9 +29,19 @@ const reports = [
 export default function ReportsPage() {
 
   const [loadingReport, setLoadingReport] = useState("");
-  const [dateRange, setDateRange] = useState({
-    from: "",
-    to: "",
+  // const [dateRange, setDateRange] = useState({
+  //   from: "",
+  //   to: "",
+  // });
+
+  const [dateRanges, setDateRanges] = useState({
+    "Purchases Report": { from: "", to: "" },
+    "Sales Report": { from: "", to: "" },
+    "Stock Transfer Transaction Report": { from: "", to: "" },
+    "Defective stock transfer to company transaction report": {
+      from: "",
+      to: "",
+    },
   });
 
   const handleDownload = async (report) => {
@@ -65,19 +75,19 @@ export default function ReportsPage() {
           break;
 
         case "Purchases Report":
-          await downloadPurchaseStockReport(dateRange);
+          await downloadPurchaseStockReport(dateRanges["Purchases Report"]);
           break;
 
         case "Sales Report":
-          await downloadSaleStockReport(dateRange);
+          await downloadSaleStockReport(dateRanges["Sales Report"]);
           break;
 
         case "Stock Transfer Transaction Report":
-          await downloadStockTransferReport(dateRange);
+          await downloadStockTransferReport(dateRanges["Stock Transfer Transaction Report"]);
           break;
 
         case "Defective stock transfer to company transaction report":
-          await downloadDefectiveStockTransferCompanyTransactionReport(dateRange);
+          await downloadDefectiveStockTransferCompanyTransactionReport(dateRanges["Defective stock transfer to company transaction report"]);
           break;
 
         default:
@@ -195,12 +205,15 @@ export default function ReportsPage() {
 
                         <input
                           type="date"
-                          value={dateRange.from}
+                          value={dateRanges[report]?.from || ""}
                           onChange={(e) =>
-                            setDateRange({
-                              ...dateRange,
-                              from: e.target.value,
-                            })
+                            setDateRanges((prev) => ({
+                              ...prev,
+                              [report]: {
+                                ...prev[report],
+                                from: e.target.value,
+                              },
+                            }))
                           }
                           className="
                           bg-transparent
@@ -239,12 +252,15 @@ export default function ReportsPage() {
 
                         <input
                           type="date"
-                          value={dateRange.to}
+                          value={dateRanges[report]?.to || ""}
                           onChange={(e) =>
-                            setDateRange({
-                              ...dateRange,
-                              to: e.target.value,
-                            })
+                            setDateRanges((prev) => ({
+                              ...prev,
+                              [report]: {
+                                ...prev[report],
+                                to: e.target.value,
+                              },
+                            }))
                           }
                           className="
                           bg-transparent
