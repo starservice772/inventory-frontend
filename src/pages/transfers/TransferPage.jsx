@@ -326,7 +326,7 @@ export default function TransferPage() {
             }}
           >
             <option value="ISSUE">Issue</option>
-            <option value="RETURN">Return</option>
+            <option value="RETURN">Good Return</option>
             <option value="DEFECTIVE_RETURN">Defective Return</option>
           </select>
         </div>
