@@ -42,7 +42,7 @@ const links = [
     to: "/defective-items",
     label: "Defective Items",
     icon: AlertTriangle,
-    roles: ["ROLE_ADMIN"],
+    roles: ["ROLE_ADMIN", "ROLE_MANAGER", "ROLE_CRM"],
   },
 ];
 
