@@ -57,9 +57,9 @@ export default function PurchasesPage() {
   ]);
 
   // 🔍 Per-row item search state
-  const [itemSearchResults, setItemSearchResults] = useState({}); // { rowIndex: [items] }
-  const [itemSearchLoading, setItemSearchLoading] = useState({}); // { rowIndex: bool }
-  const [dropdownPos, setDropdownPos] = useState(null); // { index, top, left } for portal
+  const [itemSearchResults, setItemSearchResults] = useState({});
+  const [itemSearchLoading, setItemSearchLoading] = useState({});
+  const [dropdownPos, setDropdownPos] = useState(null);
 
   // state for select employees in search
   const [employees, setEmployees] = useState([]);
@@ -160,74 +160,100 @@ export default function PurchasesPage() {
 
   // 🔍 Search item description by item code
   const handleItemCodeSearch = async (index, e) => {
-    const itemCode = items[index].itemCode?.trim();
+    const itemCode = items[index]?.itemCode?.trim();
+
     if (!itemCode) {
       toast.error("Please enter an item code first");
       return;
     }
 
-    // Anchor to the <td> cell so dropdown sits directly below the Item Code input
+    // Get position of the current row
     const td = e.currentTarget.closest("td");
     const rect = (td || e.currentTarget).getBoundingClientRect();
-    setDropdownPos(null); // reset first
 
-    setItemSearchLoading((prev) => ({ ...prev, [index]: true }));
-    setItemSearchResults((prev) => ({ ...prev, [index]: [] }));
+    // Close previous dropdown
+    setDropdownPos(null);
+
+    setItemSearchLoading((prev) => ({
+      ...prev,
+      [index]: true,
+    }));
+
+    setItemSearchResults((prev) => ({
+      ...prev,
+      [index]: [],
+    }));
 
     try {
       const results = await searchItemByCode(itemCode);
 
-      // console.log(results)
+      console.log("Search results:", results);
 
       if (!results || results.length === 0) {
         toast.error("No items found for this code");
         return;
       }
 
-      if (results.length === 1) {
-        const res = results[0]
-        // console.log(res);
-        // console.log("itemDescription:", JSON.stringify(res.itemDescription));
-        // console.log("itemDesc:", JSON.stringify(res.itemDesc));
-        // console.log("keys:", Object.keys(res));
+      // Store results for this particular row
+      setItemSearchResults((prev) => ({
+        ...prev,
+        [index]: results,
+      }));
 
+      // IMPORTANT:
+      // Dropdown will appear even when there is ONLY ONE result
+      setDropdownPos({
+        index: index,
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+        width: 400,
+      });
 
-        updateRow(index, "itemDesc", res.itemDescription || "");
-        updateRow(index, "hsnCode", res.hsnCode || "");
-
-        toast.success("Item description filled!");
-
-        return
-      } else {
-        // Multiple → show portal dropdown below the search button
-        setDropdownPos({
-          index,
-          top: rect.bottom + window.scrollY + 8,
-          left: rect.left + window.scrollX,
-          width: rect.width,
-        });
-        setItemSearchResults((prev) => ({ ...prev, [index]: results }));
-      }
     } catch (err) {
-      console.error("🔴 Search error:", err);
-      toast.error("Failed to fetch item details");
+      console.error("Search error:", err);
+
+      toast.error(
+        err?.response?.data?.message ||
+        "Failed to fetch item details"
+      );
+
+      setItemSearchResults((prev) => ({
+        ...prev,
+        [index]: [],
+      }));
+
+      setDropdownPos(null);
+
     } finally {
-      setItemSearchLoading((prev) => ({ ...prev, [index]: false }));
+      setItemSearchLoading((prev) => ({
+        ...prev,
+        [index]: false,
+      }));
     }
   };
 
   // ✅ User picks one from dropdown → fill both itemCode and itemDesc
   const selectItemFromSearch = (index, result) => {
-    const updated = [...items];
-    updated[index] = {
-      ...updated[index],
-      itemCode: result.itemCode || updated[index].itemCode,
-      itemDesc:
-        result.itemDescription || result.description || result.name || "",
-      hsnCode: result.hsnCode || result.HSNcode || result.code || ""
-    };
-    setItems(updated);
-    setItemSearchResults((prev) => ({ ...prev, [index]: [] }));
+    setItems((prev) =>
+      prev.map((row, i) =>
+        i === index
+          ? {
+            ...row,
+            itemCode: result.itemCode || row.itemCode,
+            itemDesc: result.itemDescription || "",
+            hsnCode: result.hsnCode || "",
+          }
+          : row
+      )
+    );
+
+    // Clear results for this row
+    setItemSearchResults((prev) => ({
+      ...prev,
+      [index]: [],
+    }));
+
+    // Close dropdown
     setDropdownPos(null);
   };
 
@@ -236,10 +262,10 @@ export default function PurchasesPage() {
     // Mark all required fields as touched
     setTouched({
       empName: true,
-      workNo: true,
+      // workNo: true,
       invoiceNo: true,
       invoiceDate: true,
-      gstPercentage: true,
+      // gstPercentage: true,
 
       itemCode: true,
       itemDesc: true,
@@ -457,7 +483,7 @@ export default function PurchasesPage() {
                 }`}
               value={form.workNo}
               onChange={(e) => setForm({ ...form, workNo: e.target.value })}
-              onBlur={() => setTouched({ ...touched, workNo: true })}
+            // onBlur={() => setTouched({ ...touched, workNo: true })}
             />
           </div>
 
@@ -547,12 +573,12 @@ export default function PurchasesPage() {
 
             <tbody>
               {items.map((item, index) => (
-                <tr key={index} className="hover:bg-gray-50">
+                <tr key={index} className="hover:bg-gray-50 border border-black">
                   {/* Item Code */}
                   <td className="border border-gray-300 p-1 relative">
                     <div className="flex items-center gap-1">
                       <input
-                        className={`flex-1 p-1 outline-none text-center min-w-0 ${touched.itemCode && !item.itemCode
+                        className={`flex-1 p-1 outline-none min-w-0 ${touched.itemCode && !item.itemCode
                           ? "border border-red-500"
                           : ""
                           }`}
@@ -572,10 +598,19 @@ export default function PurchasesPage() {
                         type="button"
                         title="Search item description"
                         onClick={(e) => handleItemCodeSearch(index, e)}
-                        className="flex-shrink-0 p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition"
+                        className="flex-shrink-0 p-1 rounded
+                        hover:bg-slate-100
+                        text-slate-500
+                        hover:text-slate-800
+                        transition"
                       >
                         {itemSearchLoading[index] ? (
-                          <span className="inline-block w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                          <span
+                            className="inline-block w-3.5 h-3.5
+                            border-2 border-slate-400
+                            border-t-transparent
+                            rounded-full animate-spin"
+                          />
                         ) : (
                           <Search size={13} />
                         )}
@@ -773,7 +808,7 @@ export default function PurchasesPage() {
         </div>
       </div>
 
-      {/* 📋 Portal dropdown — premium floating search results */}
+      {/* dropdown */}
       {dropdownPos &&
         itemSearchResults[dropdownPos.index]?.length > 0 &&
         createPortal(
@@ -781,117 +816,145 @@ export default function PurchasesPage() {
             style={{
               position: "absolute",
               top: dropdownPos.top,
-              left:
-                typeof window !== "undefined"
-                  ? Math.max(
-                    16 + window.scrollX,
-                    Math.min(
-                      dropdownPos.left,
-                      window.scrollX +
-                      window.innerWidth -
-                      Math.min(
-                        Math.max(dropdownPos.width + 180, 340),
-                        420,
-                        window.innerWidth - 32,
-                      ) -
-                      16,
-                    ),
-                  )
-                  : dropdownPos.left,
-              width: Math.max(dropdownPos.width + 180, 340),
-              maxWidth: "min(420px, calc(100vw - 32px))",
-              zIndex: 9999,
-              boxShadow:
-                "0 10px 30px rgba(0,0,0,0.12), 0 2px 10px rgba(0,0,0,0.08)",
-              borderRadius: "14px",
-              animation: "fadeInDown 0.18s ease",
+              left: dropdownPos.left,
+              width: "400px",
+              zIndex: 999999,
             }}
-            className="bg-white rounded-xl border border-slate-200 overflow-hidden"
+            className="bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden"
           >
+
             {/* Header */}
-            <div
-              style={{
-                background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)",
-              }}
-              className="flex items-center justify-between px-4 py-2.5"
+            <div className="flex items-center justify-between
+                      bg-slate-700 text-white
+                      px-4 py-2.5"
             >
               <div className="flex items-center gap-2">
-                <span className="text-white text-sm font-semibold">
+
+                <span className="font-semibold text-base">
                   Search Results
                 </span>
+
                 <span
-                  style={{ background: "rgba(255,255,255,0.2)" }}
-                  className="text-white text-xs font-bold px-2 py-0.5 rounded-full"
+                  className="bg-slate-500
+                       px-2 py-0.5
+                       rounded-full
+                       text-xs
+                       font-semibold"
                 >
                   {itemSearchResults[dropdownPos.index].length}
                 </span>
+
               </div>
+
               <button
                 type="button"
-                onClick={() => {
-                  setDropdownPos(null);
-                  setItemSearchResults({});
-                }}
-                className="text-slate-300 hover:text-white transition text-lg leading-none"
+                onClick={() => setDropdownPos(null)}
+                className="text-lg
+                     hover:text-red-300
+                     transition"
               >
-                ×
+                ✕
               </button>
             </div>
 
-            {/* Sub-label */}
-            <p className="text-xs text-slate-400 px-4 py-1.5 bg-slate-50 border-b border-slate-100">
-              Click an item to auto-fill the row
-            </p>
-
-            {/* Scrollable list */}
+            {/* Subtitle */}
             <div
-              style={{
-                maxHeight: "260px",
-                overflowY: "auto",
-                scrollbarWidth: "thin",
-                scrollbarColor: "#94a3b8 transparent",
-              }}
+              className="px-4 py-2
+                   text-xs
+                   text-slate-500
+                   border-b"
             >
-              {itemSearchResults[dropdownPos.index].map((res, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => selectItemFromSearch(dropdownPos.index, res)}
-                  style={{ transition: "background 0.12s" }}
-                  className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 group hover:bg-blue-50 border-b border-slate-100 last:border-0 flex items-start gap-2 sm:gap-3"
-                >
-                  {/* Number badge */}
-                  <span
-                    style={{ minWidth: 24, minHeight: 24 }}
-                    className="mt-0.5 flex items-center justify-center rounded-full bg-slate-100 group-hover:bg-blue-100 text-slate-500 group-hover:text-blue-600 text-xs font-bold transition flex-shrink-0"
-                  >
-                    {i + 1}
-                  </span>
-
-                  <span className="flex flex-col min-w-0 flex-1">
-                    <span className="font-semibold text-slate-800 text-sm leading-snug break-words whitespace-normal group-hover:text-blue-700 transition">
-                      {res.itemDescription || res.description || res.name}
-                    </span>
-
-                    {/* For viewing Item Code */}
-                    {res.itemCode && (
-                      <span className="text-xs text-slate-400 mt-1 font-mono tracking-wide break-all">
-                        Item code: {res.itemCode}
-                      </span>
-                    )}
-
-                    {/* For viewing HSN code */}
-                    {res.hsnCode && (
-                      <span className="text-xs text-slate-400 mt-1 font-mono tracking-wide break-all">
-                        HSN code: {res.hsnCode}
-                      </span>
-                    )}
-                  </span>
-                </button>
-              ))}
+              Click an item to auto-fill the row
             </div>
+
+            {/* Results */}
+            <div className="max-h-[260px] overflow-y-auto">
+
+              {itemSearchResults[dropdownPos.index].map(
+                (result, idx) => (
+
+                  <button
+                    key={`${result.itemCode}-${idx}`}
+                    type="button"
+                    onClick={() =>
+                      selectItemFromSearch(
+                        dropdownPos.index,
+                        result
+                      )
+                    }
+                    className="w-full
+                         flex
+                         gap-3
+                         px-4
+                         py-3
+                         text-left
+                         cursor-pointer
+                         hover:bg-slate-50
+                         border-b
+                         border-slate-100
+                         transition"
+                  >
+
+                    {/* Number */}
+                    <div
+                      className="w-7 h-7
+                           rounded-full
+                           bg-slate-100
+                           flex
+                           items-center
+                           justify-center
+                           text-sm
+                           font-semibold
+                           text-slate-600
+                           flex-shrink-0"
+                    >
+                      {idx + 1}
+                    </div>
+
+                    {/* Details */}
+                    <div className="flex-1 min-w-0">
+
+                      <div
+                        className="font-semibold
+                             text-[15px]
+                             text-slate-800
+                             leading-5"
+                      >
+                        {result.itemDescription}
+                      </div>
+
+                      <div
+                        className="mt-1
+                             text-xs
+                             text-slate-500"
+                      >
+                        <span className="font-medium">
+                          Item Code:
+                        </span>{" "}
+                        {result.itemCode}
+                      </div>
+
+                      <div
+                        className="text-xs
+                             text-slate-500"
+                      >
+                        <span className="font-medium">
+                          HSN Code:
+                        </span>{" "}
+                        {result.hsnCode}
+                      </div>
+
+                    </div>
+
+                  </button>
+
+                )
+              )}
+
+            </div>
+
           </div>,
-          document.body,
+          document.body
         )}
     </>
   );
