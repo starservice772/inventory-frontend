@@ -90,10 +90,15 @@ export default function PurchasesPage() {
       const qty = parseFloat(item.quantity);
       const gstPercent = parseFloat(form.gstPercentage) / 100;
 
+      // rounds any number to exactly 2 decimal places
+      const roundToTwo = (value) => {
+        return Number(Number(value).toFixed(2));
+      };
+
       if (!isNaN(rate) && !isNaN(qty) && !isNaN(gstPercent)) {
-        const gstValue = rate * gstPercent * qty;
-        const totalDp = rate + rate * gstPercent;
-        const totalPrice = qty * totalDp;
+        const gstValue = roundToTwo(rate * gstPercent * qty);
+        const totalDp = roundToTwo(rate + rate * gstPercent);
+        const totalPrice = roundToTwo(qty * totalDp);
 
         updated[index] = {
           ...updated[index],
