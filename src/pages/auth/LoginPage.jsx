@@ -171,15 +171,15 @@ export default function LoginPage() {
           </div>
 
           {/* Options */}
-          <div className="flex justify-end text-sm">
-            {/* <label className="flex items-center gap-2 text-gray-600">
+          {/* <div className="flex justify-end text-sm">
+            <label className="flex items-center gap-2 text-gray-600">
               <input type="checkbox" className="accent-blue-600" />
               Remember me
-            </label> */}
+            </label>
             <span className="text-blue-600 hover:underline cursor-pointer">
               Forgot password?
             </span>
-          </div>
+          </div> */}
 
           {/* Button */}
           <button

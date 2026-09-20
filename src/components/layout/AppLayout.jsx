@@ -13,6 +13,7 @@ import {
   User,
   IdCardLanyard,
   PackageOpen,
+  AlertTriangle,
   Menu,
   X,
 } from "lucide-react";
@@ -36,6 +37,12 @@ const links = [
     label: "Items",
     icon: PackageOpen,
     roles: ["ROLE_ADMIN"],
+  },
+  {
+    to: "/defective-items",
+    label: "Defective Items",
+    icon: AlertTriangle,
+    roles: ["ROLE_ADMIN", "ROLE_MANAGER", "ROLE_CRM"],
   },
 ];
 
@@ -163,7 +170,7 @@ export default function AppLayout() {
 
         {/* CONTENT */}
         <div className="p-3">
-          <div className="bg-white rounded-2xl shadow-sm min-h-[calc(100vh-3rem)] md:p-3 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-sm min-h-[calc(100vh-3rem)] p-4 md:p-6 overflow-y-auto">
             <Outlet />
           </div>
         </div>

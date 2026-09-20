@@ -1,11 +1,11 @@
-const BASE_URL = "https://dev.starserviceinventory.cloud/api";
+// const BASE_URL = "https://dev.starserviceinventory.cloud/api";
+
+import { BASE_URL, getAuthHeaders } from "../config/apiConfig";
 
 export default async function loginUser(payload) {
   const res = await fetch(`${BASE_URL}/auth/login`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(payload),
   });
 

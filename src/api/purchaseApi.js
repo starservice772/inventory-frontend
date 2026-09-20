@@ -1,8 +1,10 @@
-const BASE_URL = "https://dev.starserviceinventory.cloud/api";
+// const BASE_URL = "https://dev.starserviceinventory.cloud/api";
 
-const getAuthHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
+// const getAuthHeaders = () => ({
+//   Authorization: `Bearer ${localStorage.getItem("token")}`,
+// });
+
+import { BASE_URL, getAuthHeaders } from "../config/apiConfig";
 
 // ✅ Save purchase
 export const savePurchase = async (payload) => {
@@ -29,7 +31,7 @@ export const searchItemByCode = async (itemCode) => {
   if (!res.ok) throw new Error("Failed to search item by code");
 
   const raw = await res.json();
-  console.log("🔍 Search raw response:", JSON.stringify(raw));
+  // console.log("🔍 Search raw response:", JSON.stringify(raw));
 
   // Unwrap envelope: { success, message, data: [...] or data: {...} }
   const payload = raw?.data ?? raw?.items ?? raw?.content ?? raw;

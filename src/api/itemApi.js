@@ -1,16 +1,14 @@
-const BASE_URL = "https://dev.starserviceinventory.cloud/api";
+// const BASE_URL = "https://dev.starserviceinventory.cloud/api";
 
+import { BASE_URL, getAuthHeaders } from "../config/apiConfig";
 
 // SAVE THE ITEM
 export const createItem = async (payload) => {
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
 
   const res = await fetch(`${BASE_URL}/item/save`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(payload),
   });
 
@@ -32,10 +30,7 @@ export const getItems = async (page = 0, size = 30) => {
     `${BASE_URL}/item/getAll/${page}/${size}`,
     {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: getAuthHeaders()
     }
   );
 
@@ -59,10 +54,7 @@ export const updateItem = async (payload) => {
 
   const response = await fetch(`${BASE_URL}/item/update`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(payload),
   });
 
@@ -84,10 +76,7 @@ export const getItemById = async (id) => {
     `${BASE_URL}/item/getById?id=${id}`,
     {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: getAuthHeaders()
     }
   );
 
@@ -103,43 +92,39 @@ export const getItemById = async (id) => {
 
 // DELETE ANY ITEM
 export const deleteItem = async (id) => {
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    const res = await fetch(`${BASE_URL}/item/delete?id=${id}`,
-        {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        }
-    );
-
-    if (!res.ok) {
-        throw new Error("Failed to delete item");
+  const res = await fetch(`${BASE_URL}/item/delete?id=${id}`,
+    {
+      method: "POST",
+      headers: getAuthHeaders()
     }
+  );
 
-    return true;
+  if (!res.ok) {
+    throw new Error("Failed to delete item");
+  }
+
+  return true;
 };
 
 
 // SEARCH ANY PARTICULAR ITEM
 export const searchItems = async (page, search = "") => {
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    const url = `${BASE_URL}/item/getAll/${page}/30?search=${search}`;
+  const url = `${BASE_URL}/item/getAll/${page}/30?search=${search}`;
 
-    const res = await fetch(url, {
-        method: "GET",
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
+  const res = await fetch(url, {
+    method: "GET",
+    headers: getAuthHeaders()
+  });
 
-    const data = await res.json();
+  const data = await res.json();
 
-    return {
-        items: data.response || [],
-        totalPages: data.totalPages || 0,
-        totalRecords: data.totalRecords || 0,
-    };
+  return {
+    items: data.response || [],
+    totalPages: data.totalPages || 0,
+    totalRecords: data.totalRecords || 0,
+  };
 };

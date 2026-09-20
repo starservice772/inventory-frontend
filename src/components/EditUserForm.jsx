@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
-const BASE_URL = "https://dev.starserviceinventory.cloud/api";
+import { BASE_URL, getAuthHeaders } from "../config/apiConfig";
+
+// const BASE_URL = "https://dev.starserviceinventory.cloud/api";
 
 // ✅ Defined OUTSIDE — stable component reference, no remount on keystroke
 function Field({ label, name, type = "text", formData, errors, onChange }) {
@@ -95,14 +97,11 @@ function EditUserForm({ user, onSuccess }) {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      // const token = localStorage.getItem("token");
 
       const res = await fetch(`${BASE_URL}/users/update`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           id: user.uuid,
           ...formData,
